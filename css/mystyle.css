@@ -1,0 +1,36 @@
+#leftAudioCutter {
+  position: absolute;
+  z-index: 9;
+  background-color: blue;
+  text-align: center;
+  border: 2px solid #d3d3d3;
+  cursor: e-resize;
+  height: 100px;
+  width: 18px;
+  border-radius: 10px 0px 0px 10px;
+}
+
+#rightAudioCutter {
+  position: absolute;
+  z-index: 9;
+  background-color: blue;
+  text-align: center;
+  border: 2px solid #d3d3d3;
+  cursor: e-resize;
+  height: 100px;
+  width: 18px;
+  border-radius: 0px 10px 10px 0px;
+  right: 0;
+}
+
+.audio {
+  width: 100%;
+}
+
+#mydivheader {
+  padding: 10px;
+
+  z-index: 10;
+  background-color: #2196f3;
+  color: #fff;
+}
