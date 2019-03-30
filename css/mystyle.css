@@ -8,6 +8,7 @@
   height: 100px;
   width: 18px;
   border-radius: 10px 0px 0px 10px;
+  left: 0px;
 }
 
 #rightAudioCutter {
@@ -23,8 +24,19 @@
   right: 0;
 }
 
-.audio {
-  width: 100%;
+#audioCuttingWindow {
+  background: rgba(177, 47, 47, 0.54);
+  position: relative;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+#cutWindow {
+  position: absolute;
+  background-color: rgba(85, 117, 246, 0.59);
+  height: 100%;
+  width: 100px;
+  left: 18px;
 }
 
 #mydivheader {

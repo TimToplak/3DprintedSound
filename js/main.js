@@ -357,45 +357,96 @@ function processTrack(buffer) {
 }
 
 //CUTTING AUDIO
-dragElement(document.getElementById("leftAudioCutter"));
-dragElement(document.getElementById("rightAudioCutter"));
+initCutting();
+function initCutting() {
+  var leftAudioCutter = document.getElementById("leftAudioCutter");
+  var rightAudioCutter = document.getElementById("rightAudioCutter");
+  var audioCuttingWindow = document.getElementById("audioCuttingWindow");
+  var cutWindow = document.getElementById("cutWindow");
+  cutWindow.style.width = audioCuttingWindow.offsetWidth - 40 + "px";
+  var cutWindowStartWidth = audioCuttingWindow.offsetWidth - 40;
+  console.log(audioCuttingWindow.offsetWidth);
 
-function dragElement(elmnt) {
-  var pos1 = 0,
-    pos2 = 0,
-    pos3 = 0,
-    pos4 = 0;
+  var SVG2DWaveform = document.getElementById("SVG2DWaveform");
+  console.log(SVG2DWaveform.style.width);
 
-  elmnt.onmousedown = dragMouseDown;
+  dragElement(leftAudioCutter);
+  dragElement(rightAudioCutter);
 
-  function dragMouseDown(e) {
-    e = e || window.event;
-    e.preventDefault();
-    // get the mouse cursor position at startup:
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    // call a function whenever the cursor moves:
-    document.onmousemove = elementDrag;
-  }
+  function dragElement(elmnt) {
+    var pos1 = 0,
+      pos2 = 0,
+      pos3 = 0,
+      pos4 = 0;
 
-  function elementDrag(e) {
-    e = e || window.event;
-    e.preventDefault();
-    // calculate the new cursor position:
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    // set the element's new position:
-    //elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-    elmnt.style.left = elmnt.offsetLeft - pos1 + "px";
-    console.log(elmnt.offsetLeft);
-  }
+    elmnt.onmousedown = dragMouseDown;
 
-  function closeDragElement() {
-    /* stop moving when mouse button is released:*/
-    document.onmouseup = null;
-    document.onmousemove = null;
+    function dragMouseDown(e) {
+      e = e || window.event;
+      e.preventDefault();
+      // get the mouse cursor position at startup:
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      document.onmouseup = closeDragElement;
+      // call a function whenever the cursor moves:
+      document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+      e = e || window.event;
+      e.preventDefault();
+      // calculate the new cursor position:
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      // set the element's new position:
+      //elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+      if (elmnt.offsetLeft - pos1 < 0) {
+        elmnt.style.left = "0px";
+      } else {
+        elmnt.style.left = elmnt.offsetLeft - pos1 + "px";
+      }
+      console.log(elmnt.offsetLeft);
+
+      if (elmnt.id == "leftAudioCutter") {
+        if (elmnt.offsetLeft + 22 >= rightAudioCutter.offsetLeft) {
+          //preventing crossing
+          elmnt.style.left = rightAudioCutter.offsetLeft - 22 + "px";
+        }
+        //resize cut window to fit between cutters
+        cutWindow.style.left = elmnt.offsetLeft + 22 + "px";
+        cutWindow.style.width =
+          cutWindowStartWidth -
+          elmnt.offsetLeft -
+          (cutWindowStartWidth - rightAudioCutter.offsetLeft) -
+          18 +
+          "px";
+      }
+
+      if (elmnt.id == "rightAudioCutter") {
+        if (elmnt.offsetLeft - 22 <= leftAudioCutter.offsetLeft) {
+          elmnt.style.left = leftAudioCutter.offsetLeft + 22 + "px";
+        }
+
+        if (elmnt.offsetLeft >= audioCuttingWindow.offsetWidth - 22) {
+          // preventing right cutter leaving screen
+          elmnt.style.left = audioCuttingWindow.offsetWidth - 22 + "px";
+        }
+        //resize cut window to fit between cutters
+        cutWindow.style.width =
+          cutWindowStartWidth -
+          (cutWindowStartWidth - elmnt.offsetLeft) -
+          leftAudioCutter.offsetLeft -
+          18 +
+          "px";
+      }
+    }
+
+    function closeDragElement() {
+      /* stop moving when mouse button is released:*/
+      document.onmouseup = null;
+      document.onmousemove = null;
+    }
   }
 }

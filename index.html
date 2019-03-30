@@ -9,11 +9,12 @@
     <input type="file" /><br />
     <button id="record">Record</button>
     <button id="stop">Stop</button>
-    <div class="audio">
+    <div id="audioCuttingWindow">
       <div id="leftAudioCutter"></div>
       <div id="rightAudioCutter"></div>
-
+      <div id="cutWindow"></div>
       <svg
+        id="SVG2DWaveform"
         preserveAspectRatio="none"
         width="2000"
         height="100"
