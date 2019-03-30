@@ -204,6 +204,7 @@ const width = svg.getAttribute("width");
 const height = svg.getAttribute("height");
 svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 const smoothing = 1;
+var currentBlob = null;
 
 svg.addEventListener("click", e => {
   const position = e.offsetX / svg.getBoundingClientRect().width;
@@ -213,12 +214,7 @@ svg.addEventListener("click", e => {
 //audio from file
 document.querySelector("input").addEventListener("change", e => {
   const file = e.target.files[0];
-  const reader = new FileReader();
-
-  reader.readAsArrayBuffer(file);
-  attachToAudio(file);
-
-  reader.onload = e => processTrack(e.target.result);
+  proccesBlob(file);
 });
 
 //audio from michrophone
@@ -259,11 +255,7 @@ if (navigator.mediaDevices.getUserMedia) {
     mediaRecorder.onstop = function(e) {
       var blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
       chunks = [];
-
-      const micreader = new FileReader();
-      micreader.readAsArrayBuffer(blob);
-      micreader.onload = e => processTrack(e.target.result);
-      attachToAudio(blob);
+      proccesBlob(blob);
     };
 
     mediaRecorder.ondataavailable = function(e) {
@@ -285,13 +277,15 @@ const avg = values =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
 const max = values => values.reduce((max, value) => Math.max(max, value), 0);
 
+var startSliceIndex = 0;
+var endSliceIndex = 10000;
 function getWaveformData(audioBuffer, dataPoints) {
-  const leftChannel = audioBuffer.getChannelData(0);
+  var leftChannel = audioBuffer.getChannelData(0).slice(70000, 1000000);
   var rightChannel;
   if (audioBuffer.numberOfChannels == 1) {
-    rightChannel = audioBuffer.getChannelData(0); //TODO: temp fix if sound is mono
+    rightChannel = audioBuffer.getChannelData(0).slice(70000, 1000000); //TODO: temp fix if sound is mono
   } else {
-    rightChannel = audioBuffer.getChannelData(1);
+    rightChannel = audioBuffer.getChannelData(1).slice(70000, 1000000);
   }
   console.log(leftChannel);
   const values = new Float32Array(dataPoints);
@@ -339,6 +333,7 @@ function processTrack(buffer) {
   return audioContext
     .decodeAudioData(buffer)
     .then(audioBuffer => {
+      console.log(audioBuffer);
       console.timeEnd("decodeAudioData");
       console.time("getWaveformData");
       const waveformData = getWaveformData(audioBuffer, width / smoothing);
@@ -356,6 +351,15 @@ function processTrack(buffer) {
     .catch(console.error);
 }
 
+function proccesBlob(blob) {
+  const reader = new FileReader();
+  currentBlob = blob;
+  console.log(blob);
+  reader.readAsArrayBuffer(blob);
+  reader.onload = e => processTrack(e.target.result);
+  attachToAudio(blob);
+}
+
 //CUTTING AUDIO
 initCutting();
 function initCutting() {
@@ -363,12 +367,22 @@ function initCutting() {
   var rightAudioCutter = document.getElementById("rightAudioCutter");
   var audioCuttingWindow = document.getElementById("audioCuttingWindow");
   var cutWindow = document.getElementById("cutWindow");
-  cutWindow.style.width = audioCuttingWindow.offsetWidth - 40 + "px";
+  cutWindow.style.width = audioCuttingWindow.offsetWidth - 39 + "px"; //TODO: fix small gap
   var cutWindowStartWidth = audioCuttingWindow.offsetWidth - 40;
   console.log(audioCuttingWindow.offsetWidth);
 
   var SVG2DWaveform = document.getElementById("SVG2DWaveform");
   console.log(SVG2DWaveform.style.width);
+
+  var cutAudioButton = document.getElementById("cutAudioButton");
+  cutAudioButton.addEventListener("click", function() {
+    console.log(leftAudioCutter.offsetLeft / audioCuttingWindow.offsetWidth);
+    console.log(
+      (rightAudioCutter.offsetLeft + 22) / audioCuttingWindow.offsetWidth
+    );
+
+    proccesBlob(currentBlob.slice(0, 10000, "audio/wav"));
+  });
 
   dragElement(leftAudioCutter);
   dragElement(rightAudioCutter);
