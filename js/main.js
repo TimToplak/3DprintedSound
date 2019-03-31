@@ -56,56 +56,14 @@ controls.update();
 
 function animate() {
   requestAnimationFrame(animate);
-
-  // required if controls.enableDamping or controls.autoRotate are set to true
   controls.update();
-
   renderer.render(scene, camera);
 }
-
 animate();
-
-//TESTING
 
 var group = new THREE.Group();
 //group.position.y = 4;
 scene.add(group);
-
-var californiaPts = [];
-californiaPts.push(new THREE.Vector2(610, 320));
-californiaPts.push(new THREE.Vector2(450, 300));
-californiaPts.push(new THREE.Vector2(392, 392));
-californiaPts.push(new THREE.Vector2(266, 438));
-californiaPts.push(new THREE.Vector2(190, 570));
-californiaPts.push(new THREE.Vector2(190, 600));
-californiaPts.push(new THREE.Vector2(160, 620));
-californiaPts.push(new THREE.Vector2(160, 650));
-californiaPts.push(new THREE.Vector2(180, 640));
-californiaPts.push(new THREE.Vector2(165, 680));
-californiaPts.push(new THREE.Vector2(150, 670));
-californiaPts.push(new THREE.Vector2(90, 737));
-californiaPts.push(new THREE.Vector2(80, 795));
-californiaPts.push(new THREE.Vector2(50, 835));
-californiaPts.push(new THREE.Vector2(64, 870));
-californiaPts.push(new THREE.Vector2(60, 945));
-californiaPts.push(new THREE.Vector2(300, 945));
-californiaPts.push(new THREE.Vector2(300, 743));
-californiaPts.push(new THREE.Vector2(600, 473));
-californiaPts.push(new THREE.Vector2(626, 425));
-californiaPts.push(new THREE.Vector2(600, 370));
-californiaPts.push(new THREE.Vector2(600, 370));
-californiaPts.push(new THREE.Vector2(610, 320));
-
-for (var i = 0; i < californiaPts.length; i++)
-  californiaPts[i].multiplyScalar(0.25);
-var californiaShape = new THREE.Shape(californiaPts);
-
-var extrudeSettings = {
-  depth: 15,
-  bevelEnabled: false
-};
-
-addShape(californiaShape, extrudeSettings, 0xff0000, 5, 5, 5, 0, 0, 0, 0.1);
 var exportMesh;
 function addShape(shape, extrudeSettings, color, x, y, z, rx, ry, rz, s) {
   // extruded shape
@@ -172,6 +130,76 @@ function add3DWaveformFromData(values) {
   addShape(pointsShape, extrudeSettings, 0xff0000, 5, 5, 5, 0, 0, 0, 1);
 }
 
+var cube_geometry = new THREE.CubeGeometry(3, 3, 3);
+var cube_mesh = new THREE.Mesh(cube_geometry);
+//scene.add(cube_mesh);
+cube_mesh.position.x = -7;
+var cube_bsp = new ThreeBSP(cube_mesh);
+var sphere_geometry = new THREE.CylinderGeometry(0.5, 0.5, 20, 32);
+var sphere_mesh = new THREE.Mesh(sphere_geometry);
+//scene.add(sphere_mesh);
+sphere_mesh.position.x = -7;
+
+var sphere_bsp = new ThreeBSP(sphere_mesh);
+
+var subtract_bsp = cube_bsp.subtract(sphere_bsp);
+var result = subtract_bsp.toMesh(
+  new THREE.MeshPhongMaterial({
+    color: 0xff0000,
+    shininess: 66,
+    opacity: 0.3,
+    transparent: true,
+    side: THREE.DoubleSide
+  })
+);
+//result.geometry.computeVertexNormals();
+result.position.x = 5;
+scene.add(result);
+
+//FONT ADDING
+var cube_geometry = new THREE.CubeGeometry(50, 25, 3);
+var cube_mesh = new THREE.Mesh(cube_geometry);
+//scene.add(cube_mesh);
+cube_mesh.position.x = 0;
+var cube_bsp = new ThreeBSP(cube_mesh);
+
+var fontLoader = new THREE.FontLoader();
+fontLoader.load("/font.json", function(tex) {
+  var textGeo = new THREE.TextGeometry("Test", {
+    size: 10,
+    height: 5,
+    curveSegments: 6,
+    font: tex
+  });
+
+  var textMaterial = new THREE.MeshPhongMaterial({
+    color: 0xff0000,
+    shininess: 66,
+    opacity: 0.3,
+    transparent: true,
+    side: THREE.DoubleSide
+  });
+  var text = new THREE.Mesh(textGeo, textMaterial);
+  var text_bsp = new ThreeBSP(text);
+  var subtract_bsp = cube_bsp.subtract(text_bsp);
+  var result = subtract_bsp.toMesh(
+    new THREE.MeshPhongMaterial({
+      color: 0xff0000,
+      shininess: 66,
+      opacity: 0.3,
+      transparent: true,
+      side: THREE.DoubleSide
+    })
+  );
+  //result.geometry.computeVertexNormals();
+  result.position.x = 5;
+  exportMesh = result;
+  scene.add(result);
+  exportMesh = result;
+
+  //scene.add(text);
+});
+
 //HELPER FUNCTION
 function rotateObject(object, degreeX = 0, degreeY = 0, degreeZ = 0) {
   object.rotateX(THREE.Math.degToRad(degreeX));
@@ -203,12 +231,19 @@ const remaining = svg.querySelector("#remaining");
 const width = svg.getAttribute("width");
 const height = svg.getAttribute("height");
 svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-const smoothing = 1;
-var currentBlob = null;
+const smoothing = 5;
+var currentWaveFormData = null;
+var currentAudioBuffer = null;
 
 svg.addEventListener("click", e => {
   const position = e.offsetX / svg.getBoundingClientRect().width;
   audio.currentTime = position * audio.duration;
+});
+
+document.getElementById("playPauseAudio").addEventListener("click", function() {
+  audio.currentTime =
+    audio.duration * normalizedLeftCutterPosition * normalizedCutAudioLeft;
+  audio.play();
 });
 
 //audio from file
@@ -277,15 +312,22 @@ const avg = values =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
 const max = values => values.reduce((max, value) => Math.max(max, value), 0);
 
-var startSliceIndex = 0;
-var endSliceIndex = 10000;
 function getWaveformData(audioBuffer, dataPoints) {
-  var leftChannel = audioBuffer.getChannelData(0).slice(70000, 1000000);
+  var tempLeftAudioCutIndex =
+    audioBuffer.getChannelData(0).length * normalizedCutAudioLeft;
+  var tempRightAudioCutIndex =
+    audioBuffer.getChannelData(0).length * normalizedCutAudioRight;
+
+  var leftChannel = audioBuffer
+    .getChannelData(0)
+    .slice(tempLeftAudioCutIndex, tempRightAudioCutIndex);
   var rightChannel;
   if (audioBuffer.numberOfChannels == 1) {
-    rightChannel = audioBuffer.getChannelData(0).slice(70000, 1000000); //TODO: temp fix if sound is mono
+    rightChannel = leftChannel;
   } else {
-    rightChannel = audioBuffer.getChannelData(1).slice(70000, 1000000);
+    rightChannel = audioBuffer
+      .getChannelData(1)
+      .slice(tempLeftAudioCutIndex, tempRightAudioCutIndex);
   }
   console.log(leftChannel);
   const values = new Float32Array(dataPoints);
@@ -299,7 +341,7 @@ function getWaveformData(audioBuffer, dataPoints) {
       buffer = [];
     }
   }
-  console.log(values);
+  //console.log(values);
   //add3DWaveformFromData(values);
   return values;
 }
@@ -325,28 +367,24 @@ function updateAudioPosition() {
     remaining.setAttribute("x", physicalPosition);
     remaining.setAttribute("width", width - physicalPosition);
   }
+  //loop audio playing between cutters
+  if (audio.currentTime > audio.duration * normalizedRightCutterPosition) {
+    audio.currentTime = audio.duration * normalizedLeftCutterPosition;
+  }
   requestAnimationFrame(updateAudioPosition);
 }
 function processTrack(buffer) {
   const source = audioContext.createBufferSource();
-  console.time("decodeAudioData");
   return audioContext
     .decodeAudioData(buffer)
     .then(audioBuffer => {
-      console.log(audioBuffer);
-      console.timeEnd("decodeAudioData");
-      console.time("getWaveformData");
-      const waveformData = getWaveformData(audioBuffer, width / smoothing);
-      console.timeEnd("getWaveformData");
-      console.time("getSVGPath");
+      currentAudioBuffer = audioBuffer;
+      currentWaveFormData = getWaveformData(audioBuffer, width / smoothing);
       svg
         .querySelector("path")
-        .setAttribute("d", getSVGPath(waveformData, height, smoothing));
-      console.timeEnd("getSVGPath");
+        .setAttribute("d", getSVGPath(currentWaveFormData, height, smoothing));
       source.buffer = audioBuffer;
       source.connect(audioContext.destination);
-
-      add3DWaveformFromData(waveformData);
     })
     .catch(console.error);
 }
@@ -361,6 +399,12 @@ function proccesBlob(blob) {
 }
 
 //CUTTING AUDIO
+var normalizedLeftCutterPosition = 0;
+var normalizedRightCutterPosition = 1;
+
+var normalizedCutAudioLeft = 0;
+var normalizedCutAudioRight = 1;
+
 initCutting();
 function initCutting() {
   var leftAudioCutter = document.getElementById("leftAudioCutter");
@@ -374,14 +418,29 @@ function initCutting() {
   var SVG2DWaveform = document.getElementById("SVG2DWaveform");
   console.log(SVG2DWaveform.style.width);
 
+  //recalculate values of audio buffer
   var cutAudioButton = document.getElementById("cutAudioButton");
   cutAudioButton.addEventListener("click", function() {
-    console.log(leftAudioCutter.offsetLeft / audioCuttingWindow.offsetWidth);
-    console.log(
-      (rightAudioCutter.offsetLeft + 22) / audioCuttingWindow.offsetWidth
-    );
+    normalizedCutAudioLeft = normalizedLeftCutterPosition;
+    normalizedCutAudioRight = normalizedRightCutterPosition;
 
-    proccesBlob(currentBlob.slice(0, 10000, "audio/wav"));
+    currentWaveFormData = getWaveformData(
+      currentAudioBuffer,
+      width / smoothing
+    );
+    svg
+      .querySelector("path")
+      .setAttribute("d", getSVGPath(currentWaveFormData, height, smoothing));
+  });
+
+  var vizualizeCutWindow = document.getElementById("vizualizeCutWindow");
+  vizualizeCutWindow.addEventListener("click", function() {
+    add3DWaveformFromData(
+      currentWaveFormData.slice(
+        currentWaveFormData.length * normalizedLeftCutterPosition,
+        currentWaveFormData.length * normalizedRightCutterPosition
+      )
+    );
   });
 
   dragElement(leftAudioCutter);
@@ -421,7 +480,6 @@ function initCutting() {
       } else {
         elmnt.style.left = elmnt.offsetLeft - pos1 + "px";
       }
-      console.log(elmnt.offsetLeft);
 
       if (elmnt.id == "leftAudioCutter") {
         if (elmnt.offsetLeft + 22 >= rightAudioCutter.offsetLeft) {
@@ -436,6 +494,8 @@ function initCutting() {
           (cutWindowStartWidth - rightAudioCutter.offsetLeft) -
           18 +
           "px";
+        normalizedLeftCutterPosition =
+          leftAudioCutter.offsetLeft / audioCuttingWindow.offsetWidth;
       }
 
       if (elmnt.id == "rightAudioCutter") {
@@ -454,7 +514,12 @@ function initCutting() {
           leftAudioCutter.offsetLeft -
           18 +
           "px";
+        normalizedRightCutterPosition =
+          (rightAudioCutter.offsetLeft + 22) / audioCuttingWindow.offsetWidth;
       }
+
+      console.log("Left: " + normalizedLeftCutterPosition);
+      console.log("Right: " + normalizedRightCutterPosition);
     }
 
     function closeDragElement() {

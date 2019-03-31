@@ -51,14 +51,17 @@
       </svg>
     </div>
     <button id="cutAudioButton">Cut audio</button>
-
+    <button id="playPauseAudio">Play/Pause</button>
+    <button id="vizualizeCutWindow">Vizualize sound between cutters</button>
+    <br />
     <canvas height="1000px" width="1500px" id="canvasID"></canvas>
 
     <button onclick="exportBinary()">export binary</button>
-
     <script src="js/lib/three.js"></script>
     <script src="js/lib/OrbitControls.js"></script>
     <script src="js/lib/STLExporter.js"></script>
+    <script src="js/lib/ThreeCSG.js"></script>
+
     <script src="js/main.js"></script>
   </body>
 </html>
