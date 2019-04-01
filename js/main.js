@@ -130,6 +130,8 @@ function add3DWaveformFromData(values) {
   addShape(pointsShape, extrudeSettings, 0xff0000, 5, 5, 5, 0, 0, 0, 1);
 }
 
+function addFlatWaveForm(steps) {}
+
 var cube_geometry = new THREE.CubeGeometry(3, 3, 3);
 var cube_mesh = new THREE.Mesh(cube_geometry);
 //scene.add(cube_mesh);
@@ -195,8 +197,6 @@ fontLoader.load("/font.json", function(tex) {
   result.position.x = 5;
   exportMesh = result;
   scene.add(result);
-  exportMesh = result;
-
   //scene.add(text);
 });
 
@@ -529,3 +529,20 @@ function initCutting() {
     }
   }
 }
+
+//TABS
+// Show the first tab by default
+$(".tabs-stage div").hide();
+$(".tabs-stage div:first").show();
+$(".tabs-nav li:first").addClass("tab-active");
+
+// Change tab class and display content
+$(".tabs-nav a").on("click", function(event) {
+  event.preventDefault();
+  $(".tabs-nav li").removeClass("tab-active");
+  $(this)
+    .parent()
+    .addClass("tab-active");
+  $(".tabs-stage div").hide();
+  $($(this).attr("href")).show();
+});

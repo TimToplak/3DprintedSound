@@ -1,3 +1,6 @@
+body {
+  background: #eee;
+}
 #leftAudioCutter {
   position: absolute;
   z-index: 9;
@@ -45,4 +48,72 @@
   z-index: 10;
   background-color: #2196f3;
   color: #fff;
+}
+
+#audio2DControls {
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+#audio3DControls {
+  margin-left: 2%;
+  margin-right: 2%;
+}
+
+.block {
+  display: inline-block;
+  vertical-align: top;
+}
+
+ul {
+  list-style-type: none;
+}
+
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+
+.tabs {
+  width: 500px;
+}
+.tabs-nav li {
+  float: left;
+  width: 50%;
+}
+.tabs-nav li:first-child a {
+  border-right: 0;
+  border-top-left-radius: 6px;
+}
+.tabs-nav li:last-child a {
+  border-top-right-radius: 6px;
+}
+a {
+  background: #eaeaed;
+  border: 1px solid #a0a0a0;
+  color: #0087cc;
+  display: block;
+  font-weight: 600;
+  padding: 10px 0;
+  text-align: center;
+  text-decoration: none;
+}
+a:hover {
+  color: #ff7b29;
+}
+.tab-active a {
+  background: #fff;
+  border-bottom-color: transparent;
+  color: black;
+  cursor: default;
+}
+.tabs-stage {
+  border: 1px solid #a0a0a0;
+  border-radius: 0 0 6px 6px;
+  border-top: 0;
+  clear: both;
+  padding: 24px 30px;
+  position: relative;
+  top: -1px;
 }

@@ -6,61 +6,100 @@
     <link rel="stylesheet" type="text/css" href="css/mystyle.css" />
   </head>
   <body>
-    <input type="file" /><br />
-    <button id="record">Record</button>
-    <button id="stop">Stop</button>
-    <div id="audioCuttingWindow">
-      <div id="leftAudioCutter"></div>
-      <div id="rightAudioCutter"></div>
-      <div id="cutWindow"></div>
-      <svg
-        id="SVG2DWaveform"
-        preserveAspectRatio="none"
-        width="2000"
-        height="100"
-        style="width:100%;height:100px;"
-        xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink"
-      >
-        <linearGradient id="Gradient" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stop-color="white" />
-          <stop offset="90%" stop-color="white" stop-opacity="0.75" />
-          <stop offset="100%" stop-color="white" stop-opacity="0" />
-        </linearGradient>
-        <mask id="Mask">
-          <path fill="url(#Gradient)" />
-        </mask>
-        <rect
-          id="progress"
-          mask="url(#Mask)"
-          x="0"
-          y="0"
-          width="0"
+    <div id="audio2DControls">
+      <input type="file" /><br />
+      <button id="record">Record</button>
+      <button id="stop">Stop</button>
+      <div id="audioCuttingWindow">
+        <div id="leftAudioCutter"></div>
+        <div id="rightAudioCutter"></div>
+        <div id="cutWindow"></div>
+        <svg
+          id="SVG2DWaveform"
+          preserveAspectRatio="none"
+          width="2000"
           height="100"
-          fill="rgb(255, 255, 106)"
-        />
-        <rect
-          id="remaining"
-          mask="url(#Mask)"
-          x="0"
-          y="0"
-          width="0"
-          height="100"
-          fill="rgb(255, 56, 56)"
-        />
-      </svg>
-    </div>
-    <button id="cutAudioButton">Cut audio</button>
-    <button id="playPauseAudio">Play/Pause</button>
-    <button id="vizualizeCutWindow">Vizualize sound between cutters</button>
-    <br />
-    <canvas height="1000px" width="1500px" id="canvasID"></canvas>
+          style="width:100%;height:100px;"
+          xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+        >
+          <linearGradient id="Gradient" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="white" />
+            <stop offset="90%" stop-color="white" stop-opacity="0.75" />
+            <stop offset="100%" stop-color="white" stop-opacity="0" />
+          </linearGradient>
+          <mask id="Mask">
+            <path fill="url(#Gradient)" />
+          </mask>
+          <rect
+            id="progress"
+            mask="url(#Mask)"
+            x="0"
+            y="0"
+            width="0"
+            height="100"
+            fill="rgb(255, 255, 106)"
+          />
+          <rect
+            id="remaining"
+            mask="url(#Mask)"
+            x="0"
+            y="0"
+            width="0"
+            height="100"
+            fill="rgb(255, 56, 56)"
+          />
+        </svg>
+      </div>
 
-    <button onclick="exportBinary()">export binary</button>
+      <button id="cutAudioButton">Cut audio</button>
+      <button id="playPauseAudio">Play/Pause</button>
+      <button id="vizualizeCutWindow">Vizualize sound between cutters</button>
+    </div>
+    <br />
+
+    <div id="audio3DControls">
+      <div class="block">
+        <canvas height="1000px" width="1300px" id="canvasID"></canvas>
+      </div>
+      <div class="block">
+          Steps: <input type="number">
+        <div class="tabs">
+          <ul class="tabs-nav">
+            <li><a href="#tab-1">Flat</a></li>
+            <li><a href="#tab-2">Circle</a></li>
+            </ul>
+          <div class="tabs-stage">
+            <div id="tab-1">
+              Deapth: <input type="number">
+              <br>
+              Spacing: <input type="number">
+              <br>
+              Sides: 
+              <br>
+              <input type="radio" name="gender" value="male"> One<br>
+              <input type="radio" name="gender" value="female"> Two<br>
+
+            </div>
+            <div id="tab-2">
+              <p>
+                Phasellus pharetra aliquet viverra. Donec scelerisque tincidunt
+                diam, eu fringilla urna auctor at.
+              </p>
+            </div>
+            
+            </div>
+          </div>
+          <button onclick="exportBinary()">export binary</button>
+        </div>
+        
+      </div>
+    </div>
     <script src="js/lib/three.js"></script>
     <script src="js/lib/OrbitControls.js"></script>
     <script src="js/lib/STLExporter.js"></script>
     <script src="js/lib/ThreeCSG.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
     <script src="js/main.js"></script>
   </body>
