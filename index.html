@@ -63,7 +63,9 @@
         <canvas height="1000px" width="1300px" id="canvasID"></canvas>
       </div>
       <div class="block">
-          Steps: <input type="number">
+          Step: <input type="number" value="1">
+          <br>
+          Color of plastic: 
         <div class="tabs">
           <ul class="tabs-nav">
             <li><a href="#tab-1">Flat</a></li>
@@ -71,14 +73,16 @@
             </ul>
           <div class="tabs-stage">
             <div id="tab-1">
-              Deapth: <input type="number">
+              Depth: <input id="flatDepth" type="number" value="8">
               <br>
-              Spacing: <input type="number">
+              Offset: <input id="flatOffset" type="number" value="0">
+              <br>
+              Height scale: <input id="flatHeightScale" type="number" value="50">
               <br>
               Sides: 
               <br>
-              <input type="radio" name="gender" value="male"> One<br>
-              <input type="radio" name="gender" value="female"> Two<br>
+              <input type="radio" name="side" checked value="one"> One<br>
+              <input type="radio" name="side" value="two"> Two<br>
 
             </div>
             <div id="tab-2">

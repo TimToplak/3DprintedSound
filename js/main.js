@@ -3,9 +3,9 @@ var renderer = new THREE.WebGLRenderer({ canvas: canvas });
 renderer.setSize(canvas.width, canvas.height);
 
 var scene = new THREE.Scene();
-scene.background = new THREE.Color(0xf0f0f0);
+scene.background = new THREE.Color(0xbedff6);
 var camera = new THREE.PerspectiveCamera(
-  45,
+  75,
   window.innerWidth / window.innerHeight,
   1,
   10000
@@ -18,7 +18,7 @@ var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 var cube = new THREE.Mesh(geometry, material);
 scene.add(cube);
 
-var geometry = new THREE.PlaneGeometry(20, 20, 20);
+var geometry = new THREE.PlaneGeometry(1400, 1400, 1400);
 var material = new THREE.MeshBasicMaterial({
   color: 0xfffff0,
   side: THREE.DoubleSide
@@ -26,7 +26,7 @@ var material = new THREE.MeshBasicMaterial({
 
 var plane = new THREE.Mesh(geometry, material);
 rotateObject(plane, 90);
-plane.position.set(0, -1, 0);
+plane.position.set(0, -100, 0);
 scene.add(plane);
 
 var axesHelper = new THREE.AxesHelper(5);
@@ -82,7 +82,7 @@ function addShape(shape, extrudeSettings, color, x, y, z, rx, ry, rz, s) {
   mesh.rotation.set(rx, ry, rz);
   mesh.scale.set(s, s, s);
   group.add(mesh);
-  exportMesh = group;
+  //exportMesh = group;
 
   var edges = new THREE.EdgesGeometry(mesh.geometry);
   var line = new THREE.LineSegments(edges);
@@ -101,25 +101,75 @@ link.style.display = "none";
 document.body.appendChild(link);
 
 function add3DWaveformFromData(values) {
+  addFlat3DWaveForm(values, 1, "asd");
+  addCircle3DWaveForm(values, 1, 1);
+}
+
+function addCircle3DWaveForm(values, step, color) {
+  var points = [];
+
+  var stepValue = step;
+  points.push(new THREE.Vector2(0, 0));
+  for (let i = 0; i < values.length; i++) {
+    points.push(new THREE.Vector2(values[i] * 50, stepValue));
+    stepValue += step;
+  }
+  points.push(new THREE.Vector2(0, stepValue + step));
+
+  var geometry = new THREE.LatheGeometry(points, 10);
+
+  var mesh = new THREE.Mesh(
+    geometry,
+    new THREE.MeshPhongMaterial({
+      color: 0xff0000,
+      shininess: 66,
+      opacity: 0.3,
+      transparent: true,
+      side: THREE.DoubleSide
+    })
+  );
+
+  mesh.position.y = 5;
+  scene.add(mesh);
+  exportMesh = mesh;
+}
+
+function addFlat3DWaveForm(values, step, color) {
+  var depth = Number(document.getElementById("flatDepth").value);
+  var offset = Number(document.getElementById("flatOffset").value);
+  var heightScale = Number(document.getElementById("flatHeightScale").value);
+  var side;
+  var radios = document.getElementsByName("side");
+  for (var i = 0, length = radios.length; i < length; i++) {
+    if (radios[i].checked) {
+      side = radios[i].value;
+      break;
+    }
+  }
+
   var points = [];
   points.push(new THREE.Vector2(0, 0));
-  var step = 1;
+
+  console.log(typeof heightScale);
   var stepValue = step;
   for (let i = 0; i < values.length; i++) {
-    points.push(new THREE.Vector2(stepValue, values[i] * 50));
+    points.push(new THREE.Vector2(stepValue, values[i] * heightScale + offset));
     stepValue += step;
   }
   points.push(new THREE.Vector2(stepValue + step, 0));
-  stepValue -= step;
-  values = values.reverse();
-  for (let i = 0; i < values.length; i++) {
-    points.push(new THREE.Vector2(stepValue, -values[i] * 50));
-    stepValue -= step;
-  }
 
-  console.log(points);
+  if (side == "two") {
+    stepValue -= step;
+    values = values.reverse();
+    for (let i = 0; i < values.length; i++) {
+      points.push(
+        new THREE.Vector2(stepValue, -values[i] * heightScale - offset)
+      );
+      stepValue -= step;
+    }
+  }
   var extrudeSettings = {
-    depth: 8,
+    depth: depth,
     bevelEnabled: false
     //bevelSegments: 2,
     //steps: 2,
@@ -130,8 +180,8 @@ function add3DWaveformFromData(values) {
   addShape(pointsShape, extrudeSettings, 0xff0000, 5, 5, 5, 0, 0, 0, 1);
 }
 
-function addFlatWaveForm(steps) {}
-
+//CUTTING EXAMPLE
+/*
 var cube_geometry = new THREE.CubeGeometry(3, 3, 3);
 var cube_mesh = new THREE.Mesh(cube_geometry);
 //scene.add(cube_mesh);
@@ -199,7 +249,7 @@ fontLoader.load("/font.json", function(tex) {
   scene.add(result);
   //scene.add(text);
 });
-
+*/
 //HELPER FUNCTION
 function rotateObject(object, degreeX = 0, degreeY = 0, degreeZ = 0) {
   object.rotateX(THREE.Math.degToRad(degreeX));
@@ -234,6 +284,9 @@ svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 const smoothing = 5;
 var currentWaveFormData = null;
 var currentAudioBuffer = null;
+var startAudioTime;
+var endAudioTime;
+var audioDuration;
 
 svg.addEventListener("click", e => {
   const position = e.offsetX / svg.getBoundingClientRect().width;
@@ -314,9 +367,9 @@ const max = values => values.reduce((max, value) => Math.max(max, value), 0);
 
 function getWaveformData(audioBuffer, dataPoints) {
   var tempLeftAudioCutIndex =
-    audioBuffer.getChannelData(0).length * normalizedCutAudioLeft;
+    audioBuffer.getChannelData(0).length * normalizedLeftCutterPosition;
   var tempRightAudioCutIndex =
-    audioBuffer.getChannelData(0).length * normalizedCutAudioRight;
+    audioBuffer.getChannelData(0).length * normalizedRightCutterPosition;
 
   var leftChannel = audioBuffer
     .getChannelData(0)
@@ -357,19 +410,25 @@ function getSVGPath(waveformData) {
 function attachToAudio(file) {
   audio.setAttribute("autoplay", true);
   audio.src = URL.createObjectURL(file);
+
   updateAudioPosition();
 }
+audio.addEventListener("loadeddata", function() {
+  startAudioTime = 0;
+  endAudioTime = audio.duration;
+  audioDuration = audio.duration;
+});
 function updateAudioPosition() {
   const { currentTime, duration } = audio;
-  const physicalPosition = (currentTime / duration) * width;
+  const physicalPosition = (currentTime / audioDuration) * width;
   if (physicalPosition) {
     progress.setAttribute("width", physicalPosition);
     remaining.setAttribute("x", physicalPosition);
     remaining.setAttribute("width", width - physicalPosition);
   }
   //loop audio playing between cutters
-  if (audio.currentTime > audio.duration * normalizedRightCutterPosition) {
-    audio.currentTime = audio.duration * normalizedLeftCutterPosition;
+  if (audio.currentTime > endAudioTime) {
+    audio.currentTime = startAudioTime;
   }
   requestAnimationFrame(updateAudioPosition);
 }
@@ -402,9 +461,6 @@ function proccesBlob(blob) {
 var normalizedLeftCutterPosition = 0;
 var normalizedRightCutterPosition = 1;
 
-var normalizedCutAudioLeft = 0;
-var normalizedCutAudioRight = 1;
-
 initCutting();
 function initCutting() {
   var leftAudioCutter = document.getElementById("leftAudioCutter");
@@ -421,8 +477,9 @@ function initCutting() {
   //recalculate values of audio buffer
   var cutAudioButton = document.getElementById("cutAudioButton");
   cutAudioButton.addEventListener("click", function() {
-    normalizedCutAudioLeft = normalizedLeftCutterPosition;
-    normalizedCutAudioRight = normalizedRightCutterPosition;
+    startAudioTime = audioDuration * normalizedLeftCutterPosition;
+    endAudioTime = audioDuration * normalizedRightCutterPosition;
+    audioDuration = endAudioTime - startAudioTime;
 
     currentWaveFormData = getWaveformData(
       currentAudioBuffer,
@@ -496,6 +553,7 @@ function initCutting() {
           "px";
         normalizedLeftCutterPosition =
           leftAudioCutter.offsetLeft / audioCuttingWindow.offsetWidth;
+        startAudioTime = audioDuration * normalizedLeftCutterPosition;
       }
 
       if (elmnt.id == "rightAudioCutter") {
@@ -516,6 +574,9 @@ function initCutting() {
           "px";
         normalizedRightCutterPosition =
           (rightAudioCutter.offsetLeft + 22) / audioCuttingWindow.offsetWidth;
+        endAudioTime = audioDuration * normalizedRightCutterPosition;
+        console.log(endAudioTime);
+        console.log(audio.currentTime);
       }
 
       console.log("Left: " + normalizedLeftCutterPosition);

@@ -63,6 +63,7 @@ body {
 .block {
   display: inline-block;
   vertical-align: top;
+  border: 1px solid #a0a0a0;
 }
 
 ul {
@@ -84,14 +85,14 @@ li {
 }
 .tabs-nav li:first-child a {
   border-right: 0;
-  border-top-left-radius: 6px;
 }
 .tabs-nav li:last-child a {
-  border-top-right-radius: 6px;
+  color: #ff7b29;
 }
 a {
   background: #eaeaed;
-  border: 1px solid #a0a0a0;
+  border-top: 1px solid #a0a0a0;
+  border-bottom: 1px solid #a0a0a0;
   color: #0087cc;
   display: block;
   font-weight: 600;
@@ -109,8 +110,8 @@ a:hover {
   cursor: default;
 }
 .tabs-stage {
-  border: 1px solid #a0a0a0;
-  border-radius: 0 0 6px 6px;
+  border-top: 1px solid #a0a0a0;
+  border-bottom: 1px solid #a0a0a0;
   border-top: 0;
   clear: both;
   padding: 24px 30px;
