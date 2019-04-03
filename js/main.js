@@ -36,7 +36,7 @@ var light = new THREE.DirectionalLight(0xffffff);
 light.position.set(0, 1, 1).normalize();
 scene.add(light);
 
-var gridHelper = new THREE.GridHelper(400, 40, 0x0000ff, 0x808080);
+var gridHelper = new THREE.GridHelper(4000, 80, 0x0000ff, 0x808080);
 gridHelper.position.y = -0.1;
 gridHelper.position.x = -0.1;
 scene.add(gridHelper);
@@ -67,33 +67,6 @@ scene.add(group);
 var exportMesh;
 function addShape(shape, extrudeSettings, color, x, y, z, rx, ry, rz, s) {
   // extruded shape
-  var geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
-  var mesh = new THREE.Mesh(
-    geometry,
-    new THREE.MeshPhongMaterial({
-      color: color,
-      shininess: 66,
-      opacity: 0.3,
-      transparent: true,
-      side: THREE.DoubleSide
-    })
-  );
-  mesh.position.set(x, y, z);
-  mesh.rotation.set(rx, ry, rz);
-  mesh.scale.set(s, s, s);
-  group.add(mesh);
-  //exportMesh = group;
-
-  var edges = new THREE.EdgesGeometry(mesh.geometry);
-  var line = new THREE.LineSegments(edges);
-  line.material.depthTest = false;
-  line.material.opacity = 0.25;
-  line.material.transparent = true;
-  line.position.x = -4;
-  group.add(line);
-  scene.add(new THREE.BoxHelper(line));
-  //scene.add(new THREE.BoxHelper(group));
-  //scene.add(new THREE.BoxHelper(scene));
 }
 
 var link = document.createElement("a");
@@ -101,22 +74,27 @@ link.style.display = "none";
 document.body.appendChild(link);
 
 function add3DWaveformFromData(values) {
-  addFlat3DWaveForm(values, 1, "asd");
-  addCircle3DWaveForm(values, 1, 1);
+  var offset = Number(document.getElementById("offset").value);
+  var heightScale = Number(document.getElementById("heightScale").value);
+
+  addFlat3DWaveForm(values, 1, 0xff0000, heightScale, offset);
+  //addCircle3DWaveForm(values, 1, 0xff0000, heightScale, offset);
 }
 
-function addCircle3DWaveForm(values, step, color) {
+function addCircle3DWaveForm(values, step, color, heightScale, offset) {
+  var segmets = Number(document.getElementById("segmets").value);
+
   var points = [];
 
   var stepValue = step;
   points.push(new THREE.Vector2(0, 0));
   for (let i = 0; i < values.length; i++) {
-    points.push(new THREE.Vector2(values[i] * 50, stepValue));
+    points.push(new THREE.Vector2(values[i] * heightScale + offset, stepValue));
     stepValue += step;
   }
   points.push(new THREE.Vector2(0, stepValue + step));
 
-  var geometry = new THREE.LatheGeometry(points, 10);
+  var geometry = new THREE.LatheGeometry(points, segmets);
 
   var mesh = new THREE.Mesh(
     geometry,
@@ -129,15 +107,13 @@ function addCircle3DWaveForm(values, step, color) {
     })
   );
 
-  mesh.position.y = 5;
+  rotateObject(mesh, 0, 180, 90);
   scene.add(mesh);
-  exportMesh = mesh;
+  //exportMesh = mesh;
 }
 
-function addFlat3DWaveForm(values, step, color) {
+function addFlat3DWaveForm(values, step, color, heightScale, offset) {
   var depth = Number(document.getElementById("flatDepth").value);
-  var offset = Number(document.getElementById("flatOffset").value);
-  var heightScale = Number(document.getElementById("flatHeightScale").value);
   var side;
   var radios = document.getElementsByName("side");
   for (var i = 0, length = radios.length; i < length; i++) {
@@ -177,9 +153,85 @@ function addFlat3DWaveForm(values, step, color) {
     //bevelThickness: 1
   };
   var pointsShape = new THREE.Shape(points);
-  addShape(pointsShape, extrudeSettings, 0xff0000, 5, 5, 5, 0, 0, 0, 1);
+  var geometry = new THREE.ExtrudeBufferGeometry(pointsShape, extrudeSettings);
+
+  //work around, so that THREEBSP works
+  var test = new THREE.Geometry().fromBufferGeometry(geometry);
+
+  var mesh = new THREE.Mesh(
+    test,
+    new THREE.MeshPhongMaterial({
+      color: color,
+      shininess: 66,
+      opacity: 0.3,
+      transparent: true,
+      side: THREE.DoubleSide
+    })
+  );
+
+  exportMesh = mesh;
+
+  //FONT ADDING
+  if (true) {
+    addText(mesh, (step * values.length) / 2, 0, 0, 0, 0, 0, 1);
+  }
+
+  //HELPERS
+  var edges = new THREE.EdgesGeometry(mesh.geometry);
+  var line = new THREE.LineSegments(edges);
+  line.material.depthTest = false;
+  line.material.opacity = 0.25;
+  line.material.transparent = true;
+  scene.add(line);
+  scene.add(new THREE.BoxHelper(line));
+  //scene.add(new THREE.BoxHelper(group));
+  //scene.add(new THREE.BoxHelper(scene));
 }
 
+function addText(mesh, x, y, z, rx, ry, rz, s) {
+  var mesh_bsp = new ThreeBSP(mesh);
+
+  var fontLoader = new THREE.FontLoader();
+  fontLoader.load("/font.json", function(tex) {
+    var textGeo = new THREE.TextGeometry("Test", {
+      size: 10,
+      height: 5,
+      curveSegments: 6,
+      font: tex
+    });
+
+    var textMaterial = new THREE.MeshPhongMaterial({
+      color: 0xff0000,
+      shininess: 66,
+      opacity: 0.3,
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+    var text = new THREE.Mesh(textGeo, textMaterial);
+    text.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(x, 0, 0));
+
+    var text_bsp = new ThreeBSP(text);
+    var subtract_bsp = mesh_bsp.subtract(text_bsp);
+    var result = subtract_bsp.toMesh(
+      new THREE.MeshPhongMaterial({
+        color: 0xff0000,
+        shininess: 66,
+        opacity: 0.3,
+        transparent: true,
+        side: THREE.DoubleSide
+      })
+    );
+    result.geometry.computeVertexNormals();
+    exportMesh = result;
+    scene.add(result);
+    //scene.add(text);
+  });
+}
+
+function updateMesh(mesh, newMesh) {
+  scene.remove(mesh);
+  scene.add(newMesh);
+}
 //CUTTING EXAMPLE
 /*
 var cube_geometry = new THREE.CubeGeometry(3, 3, 3);
@@ -251,10 +303,10 @@ fontLoader.load("/font.json", function(tex) {
 });
 */
 //HELPER FUNCTION
-function rotateObject(object, degreeX = 0, degreeY = 0, degreeZ = 0) {
-  object.rotateX(THREE.Math.degToRad(degreeX));
-  object.rotateY(THREE.Math.degToRad(degreeY));
-  object.rotateZ(THREE.Math.degToRad(degreeZ));
+function rotateObject(mesh, degreeX = 0, degreeY = 0, degreeZ = 0) {
+  mesh.rotateX(THREE.Math.degToRad(degreeX));
+  mesh.rotateY(THREE.Math.degToRad(degreeY));
+  mesh.rotateZ(THREE.Math.degToRad(degreeZ));
 }
 
 //EXPORT FUNCTIONS

@@ -84,7 +84,7 @@ li {
   width: 50%;
 }
 .tabs-nav li:first-child a {
-  border-right: 0;
+  border-right: 1px solid #a0a0a0;
 }
 .tabs-nav li:last-child a {
   color: #ff7b29;
