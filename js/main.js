@@ -2,6 +2,7 @@ var canvas = document.getElementById("canvasID");
 var renderer = new THREE.WebGLRenderer({ canvas: canvas });
 renderer.setSize(canvas.width, canvas.height);
 
+var currentWaveFormMesh;
 var scene = new THREE.Scene();
 scene.background = new THREE.Color(0xbedff6);
 var camera = new THREE.PerspectiveCamera(
@@ -12,11 +13,6 @@ var camera = new THREE.PerspectiveCamera(
 );
 
 var exporter = new THREE.STLExporter();
-
-var geometry = new THREE.BoxGeometry(1, 1, 1);
-var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-var cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
 
 var geometry = new THREE.PlaneGeometry(1400, 1400, 1400);
 var material = new THREE.MeshBasicMaterial({
@@ -37,8 +33,7 @@ light.position.set(0, 1, 1).normalize();
 scene.add(light);
 
 var gridHelper = new THREE.GridHelper(4000, 80, 0x0000ff, 0x808080);
-gridHelper.position.y = -0.1;
-gridHelper.position.x = -0.1;
+gridHelper.position.y = -10;
 scene.add(gridHelper);
 
 controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -51,7 +46,7 @@ controls.maxDistance = 500;
 //controls.maxPolarAngle = Math.PI / 2;
 
 //controls.update() must be called after any manual changes to the camera's transform
-camera.position.set(5, 5, 10);
+camera.position.set(-8, 10, 15);
 controls.update();
 
 function animate() {
@@ -169,13 +164,18 @@ function addFlat3DWaveForm(values, step, color, heightScale, offset) {
     })
   );
 
-  exportMesh = mesh;
+  updateMesh(mesh);
 
   //FONT ADDING
   if (true) {
-    addText(mesh, (step * values.length) / 2, 0, 0, 0, 0, 0, 1);
+    addText(mesh, (step * values.length) / 2, -5, 8, 0, 0, 0, 1, function(
+      result
+    ) {
+      updateMesh(result);
+    });
   }
 
+  /*
   //HELPERS
   var edges = new THREE.EdgesGeometry(mesh.geometry);
   var line = new THREE.LineSegments(edges);
@@ -186,16 +186,17 @@ function addFlat3DWaveForm(values, step, color, heightScale, offset) {
   scene.add(new THREE.BoxHelper(line));
   //scene.add(new THREE.BoxHelper(group));
   //scene.add(new THREE.BoxHelper(scene));
+  */
 }
 
-function addText(mesh, x, y, z, rx, ry, rz, s) {
+function addText(mesh, x, y, z, rx, ry, rz, s, callback) {
   var mesh_bsp = new ThreeBSP(mesh);
 
   var fontLoader = new THREE.FontLoader();
   fontLoader.load("/font.json", function(tex) {
     var textGeo = new THREE.TextGeometry("Test", {
       size: 10,
-      height: 5,
+      height: 6,
       curveSegments: 6,
       font: tex
     });
@@ -208,10 +209,10 @@ function addText(mesh, x, y, z, rx, ry, rz, s) {
       side: THREE.DoubleSide
     });
     var text = new THREE.Mesh(textGeo, textMaterial);
-    text.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(x, 0, 0));
+    text.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(x, y, z));
 
     var text_bsp = new ThreeBSP(text);
-    var subtract_bsp = mesh_bsp.subtract(text_bsp);
+    var subtract_bsp = mesh_bsp.union(text_bsp);
     var result = subtract_bsp.toMesh(
       new THREE.MeshPhongMaterial({
         color: 0xff0000,
@@ -222,14 +223,15 @@ function addText(mesh, x, y, z, rx, ry, rz, s) {
       })
     );
     result.geometry.computeVertexNormals();
-    exportMesh = result;
-    scene.add(result);
+
+    callback(result);
     //scene.add(text);
   });
 }
 
-function updateMesh(mesh, newMesh) {
-  scene.remove(mesh);
+function updateMesh(newMesh) {
+  scene.remove(currentWaveFormMesh);
+  currentWaveFormMesh = newMesh;
   scene.add(newMesh);
 }
 //CUTTING EXAMPLE
@@ -333,7 +335,7 @@ const remaining = svg.querySelector("#remaining");
 const width = svg.getAttribute("width");
 const height = svg.getAttribute("height");
 svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-const smoothing = 5;
+const smoothing = 1;
 var currentWaveFormData = null;
 var currentAudioBuffer = null;
 var startAudioTime;
@@ -347,7 +349,7 @@ svg.addEventListener("click", e => {
 
 document.getElementById("playPauseAudio").addEventListener("click", function() {
   audio.currentTime =
-    audio.duration * normalizedLeftCutterPosition * normalizedCutAudioLeft;
+    startAudioTime + audioDuration * normalizedLeftCutterPosition;
   audio.play();
 });
 

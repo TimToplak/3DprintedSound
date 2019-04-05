@@ -85,10 +85,25 @@
               
               Sides: 
               <br>
-              <input type="radio" name="side" checked value="one"> One<br>
-              <input type="radio" name="side" value="two"> Two<br>
-              Add text
+              <input type="radio" name="side"  value="one"> One<br>
+              <input type="radio" name="side" checked value="two"> Two<br><br>
+
+              <input type="checkbox" id="addTextFlat"> add text
               <br>
+              <input type="text" id="textFlat" value="test"> 
+              <br>
+              Text depth:
+              <input type="number" id="textDepth">
+              <br>
+              Move text:
+              <br>
+              X: <input id="flatXtext" type="number" value="0">
+              <br>
+              Y: <input id="flatYtext" type="number" value="0">
+              <br>
+              Z: <input id="flatZtext" type="number" value="0">
+              <br>
+
             </div>
             <div id="tab-2">
               Segments: <input id="segmets" type="number" value="15">
@@ -104,6 +119,7 @@
     <script src="js/lib/three.js"></script>
     <script src="js/lib/OrbitControls.js"></script>
     <script src="js/lib/STLExporter.js"></script>
+    <script src="js/lib/TransformControls.js"></script>
     <script src="js/lib/ThreeCSG.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
