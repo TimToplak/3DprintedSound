@@ -46,7 +46,7 @@ controls.maxDistance = 500;
 //controls.maxPolarAngle = Math.PI / 2;
 
 //controls.update() must be called after any manual changes to the camera's transform
-camera.position.set(-8, 10, 15);
+camera.position.set(-25, 25, 20);
 controls.update();
 
 function animate() {
@@ -56,27 +56,165 @@ function animate() {
 }
 animate();
 
-var group = new THREE.Group();
-//group.position.y = 4;
-scene.add(group);
-var exportMesh;
-function addShape(shape, extrudeSettings, color, x, y, z, rx, ry, rz, s) {
-  // extruded shape
-}
-
 var link = document.createElement("a");
 link.style.display = "none";
 document.body.appendChild(link);
 
 function add3DWaveformFromData(values) {
+  var step = Number(document.getElementById("step").value);
   var offset = Number(document.getElementById("offset").value);
   var heightScale = Number(document.getElementById("heightScale").value);
 
-  addFlat3DWaveForm(values, 1, 0xff0000, heightScale, offset);
-  //addCircle3DWaveForm(values, 1, 0xff0000, heightScale, offset);
+  var waveFormType = document
+    .getElementsByClassName("tab-active")[0]
+    .getAttribute("value");
+
+  if (waveFormType == "flat") {
+    addFlat3DWaveForm(
+      values,
+      step,
+      0xff0000,
+      heightScale,
+      offset,
+      addTextORANDstand
+    );
+  } else {
+    addCircle3DWaveForm(
+      values,
+      1,
+      0xff0000,
+      heightScale,
+      offset,
+      addTextORANDstand
+    );
+  }
+
+  //
 }
 
-function addCircle3DWaveForm(values, step, color, heightScale, offset) {
+function addTextORANDstand(mesh) {
+  var addTextBool;
+  var addStand;
+  //FONT ADDING
+
+  var text = String(document.getElementById("textFlat").value);
+  var textDepth = Number(document.getElementById("textDepth").value);
+  var textX = Number(document.getElementById("flatXtext").value);
+  var textY = Number(document.getElementById("flatYtext").value);
+  var textZ = Number(document.getElementById("flatZtext").value);
+  var textSize = Number(document.getElementById("textSize").value);
+  var type;
+  var radiosText = document.getElementsByName("textTypeFlat");
+  for (var i = 0, length = radiosText.length; i < length; i++) {
+    if (radiosText[i].checked) {
+      type = radiosText[i].value;
+      break;
+    }
+  }
+
+  addText(
+    mesh,
+    text,
+    textDepth,
+    textSize,
+    type,
+    textX,
+    textY,
+    textZ,
+    0,
+    0,
+    0,
+    1,
+    loadStand
+  );
+
+  if (addStand && addTextBool) {
+  } else if (addTextBool) {
+  } else if (addStand) {
+  }
+}
+
+function loadStand(waveMesh) {
+  /*
+  var loader = new THREE.STLLoader();
+  loader.load("../stand.stl", function(geometry) {
+    var mesh = new THREE.Mesh(
+      geometry,
+      new THREE.MeshPhongMaterial({
+        color: 0xff0000,
+        shininess: 66,
+        opacity: 0.3,
+        transparent: true,
+        side: THREE.DoubleSide
+      })
+    );
+
+   
+
+    var group = new THREE.Group();
+    group.add(cylinder);
+    group.add(mesh);
+
+    mesh.add(cylinder);
+    
+
+    scene.add(group);
+  });
+  */
+
+  var cylinderX = Number(document.getElementById("cylinderX").value);
+  var cylinderY = Number(document.getElementById("cylinderY").value);
+  var cylinderZ = Number(document.getElementById("cylinderZ").value);
+  var cylinderRadius = Number(document.getElementById("cylinderRadius").value);
+  var cylinderHeight = Number(document.getElementById("cylinderHeight").value);
+  var radiosCylinder = document.getElementsByName("radiosCylinderType");
+  var radiosCylinderType;
+  for (var i = 0, length = radiosCylinder.length; i < length; i++) {
+    if (radiosCylinder[i].checked) {
+      radiosCylinderType = radiosCylinder[i].value;
+      break;
+    }
+  }
+
+  var geometry = new THREE.CylinderGeometry(
+    cylinderRadius,
+    cylinderRadius,
+    cylinderHeight,
+    32
+  );
+  var material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+  var cylinder = new THREE.Mesh(geometry, material);
+  cylinder.geometry.applyMatrix(
+    new THREE.Matrix4().makeTranslation(cylinderX, cylinderY, cylinderZ)
+  );
+  var mesh_bsp = new ThreeBSP(waveMesh);
+  var cylinder_bsp = new ThreeBSP(cylinder);
+  if (radiosCylinderType == "subtract") {
+    var subtract_bsp = mesh_bsp.subtract(cylinder_bsp);
+  } else {
+    var subtract_bsp = mesh_bsp.union(cylinder_bsp);
+  }
+  var result = subtract_bsp.toMesh(
+    new THREE.MeshPhongMaterial({
+      color: 0xff0000,
+      shininess: 66,
+      opacity: 0.3,
+      transparent: true,
+      side: THREE.DoubleSide
+    })
+  );
+
+  updateMesh(result);
+}
+
+function addCircle3DWaveForm(
+  values,
+  step,
+  color,
+  heightScale,
+  offset,
+  callback
+) {
   var segmets = Number(document.getElementById("segmets").value);
 
   var points = [];
@@ -102,12 +240,15 @@ function addCircle3DWaveForm(values, step, color, heightScale, offset) {
     })
   );
 
-  rotateObject(mesh, 0, 180, 90);
-  scene.add(mesh);
+  //mesh.geometry.applyMatrix(new THREE.Matrix4().makeRotationY(180));
+  mesh.geometry.applyMatrix(new THREE.Matrix4().makeRotationZ(4.71238898));
+
+  updateMesh(mesh);
+  callback(mesh);
   //exportMesh = mesh;
 }
 
-function addFlat3DWaveForm(values, step, color, heightScale, offset) {
+function addFlat3DWaveForm(values, step, color, heightScale, offset, callback) {
   var depth = Number(document.getElementById("flatDepth").value);
   var side;
   var radios = document.getElementsByName("side");
@@ -165,16 +306,7 @@ function addFlat3DWaveForm(values, step, color, heightScale, offset) {
   );
 
   updateMesh(mesh);
-
-  //FONT ADDING
-  if (true) {
-    addText(mesh, (step * values.length) / 2, -5, 8, 0, 0, 0, 1, function(
-      result
-    ) {
-      updateMesh(result);
-    });
-  }
-
+  callback(mesh);
   /*
   //HELPERS
   var edges = new THREE.EdgesGeometry(mesh.geometry);
@@ -189,14 +321,27 @@ function addFlat3DWaveForm(values, step, color, heightScale, offset) {
   */
 }
 
-function addText(mesh, x, y, z, rx, ry, rz, s, callback) {
+function addText(
+  mesh,
+  textLocal,
+  depth,
+  textSize,
+  type,
+  x,
+  y,
+  z,
+  rx,
+  ry,
+  rz,
+  s,
+  callback
+) {
   var mesh_bsp = new ThreeBSP(mesh);
-
   var fontLoader = new THREE.FontLoader();
-  fontLoader.load("/font.json", function(tex) {
-    var textGeo = new THREE.TextGeometry("Test", {
-      size: 10,
-      height: 6,
+  fontLoader.load("/font2.json", function(tex) {
+    var textGeo = new THREE.TextGeometry(textLocal, {
+      size: textSize,
+      height: depth,
       curveSegments: 6,
       font: tex
     });
@@ -212,7 +357,11 @@ function addText(mesh, x, y, z, rx, ry, rz, s, callback) {
     text.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(x, y, z));
 
     var text_bsp = new ThreeBSP(text);
-    var subtract_bsp = mesh_bsp.union(text_bsp);
+    if (type == "subtract") {
+      var subtract_bsp = mesh_bsp.subtract(text_bsp);
+    } else {
+      var subtract_bsp = mesh_bsp.union(text_bsp);
+    }
     var result = subtract_bsp.toMesh(
       new THREE.MeshPhongMaterial({
         color: 0xff0000,
@@ -316,7 +465,7 @@ function saveArrayBuffer(buffer, filename) {
   save(new Blob([buffer], { type: "application/octet-stream" }), filename);
 }
 function exportBinary() {
-  var result = exporter.parse(exportMesh, { binary: true });
+  var result = exporter.parse(currentWaveFormMesh, { binary: true });
   saveArrayBuffer(result, "box.stl");
 }
 
@@ -335,7 +484,7 @@ const remaining = svg.querySelector("#remaining");
 const width = svg.getAttribute("width");
 const height = svg.getAttribute("height");
 svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-const smoothing = 1;
+const smoothing = 4;
 var currentWaveFormData = null;
 var currentAudioBuffer = null;
 var startAudioTime;
