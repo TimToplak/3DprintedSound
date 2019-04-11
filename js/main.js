@@ -60,7 +60,7 @@ var link = document.createElement("a");
 link.style.display = "none";
 document.body.appendChild(link);
 
-function add3DWaveformFromData(values) {
+async function add3DWaveformFromData(values) {
   var step = Number(document.getElementById("step").value);
   var offset = Number(document.getElementById("offset").value);
   var heightScale = Number(document.getElementById("heightScale").value);
@@ -69,72 +69,69 @@ function add3DWaveformFromData(values) {
     .getElementsByClassName("tab-active")[0]
     .getAttribute("value");
 
+  var waveFormMesh;
   if (waveFormType == "flat") {
-    addFlat3DWaveForm(
+    waveFormMesh = await addFlat3DWaveForm(
       values,
       step,
       0xff0000,
       heightScale,
-      offset,
-      addTextORANDstand
+      offset
     );
   } else {
-    addCircle3DWaveForm(
+    waveFormMesh = await addCircle3DWaveForm(
       values,
       1,
       0xff0000,
       heightScale,
-      offset,
-      addTextORANDstand
+      offset
     );
   }
 
+  console.log(waveFormMesh);
+
+  if (document.getElementById("addTextFlat").checked) {
+    var text = String(document.getElementById("textFlat").value);
+    var textDepth = Number(document.getElementById("textDepth").value);
+    var textX = Number(document.getElementById("flatXtext").value);
+    var textY = Number(document.getElementById("flatYtext").value);
+    var textZ = Number(document.getElementById("flatZtext").value);
+    var textSize = Number(document.getElementById("textSize").value);
+    var type;
+    var radiosText = document.getElementsByName("textTypeFlat");
+    for (var i = 0, length = radiosText.length; i < length; i++) {
+      if (radiosText[i].checked) {
+        type = radiosText[i].value;
+        break;
+      }
+    }
+
+    var TextWaveFormMesh = await addTextWrapper(
+      waveFormMesh,
+      text,
+      textDepth,
+      textSize,
+      type,
+      textX,
+      textY,
+      textZ,
+      0,
+      0,
+      0,
+      1
+    );
+    console.log(TextWaveFormMesh);
+    scene.add(TextWaveFormMesh);
+  }
+
+  if (document.getElementById("addStand").checked) {
+    waveFormMesh = await loadStand(waveFormMesh);
+  }
+  scene.add(waveFormMesh);
   //
 }
 
-function addTextORANDstand(mesh) {
-  var addTextBool;
-  var addStand;
-  //FONT ADDING
-
-  var text = String(document.getElementById("textFlat").value);
-  var textDepth = Number(document.getElementById("textDepth").value);
-  var textX = Number(document.getElementById("flatXtext").value);
-  var textY = Number(document.getElementById("flatYtext").value);
-  var textZ = Number(document.getElementById("flatZtext").value);
-  var textSize = Number(document.getElementById("textSize").value);
-  var type;
-  var radiosText = document.getElementsByName("textTypeFlat");
-  for (var i = 0, length = radiosText.length; i < length; i++) {
-    if (radiosText[i].checked) {
-      type = radiosText[i].value;
-      break;
-    }
-  }
-
-  addText(
-    mesh,
-    text,
-    textDepth,
-    textSize,
-    type,
-    textX,
-    textY,
-    textZ,
-    0,
-    0,
-    0,
-    1,
-    loadStand
-  );
-
-  if (addStand && addTextBool) {
-  } else if (addTextBool) {
-  } else if (addStand) {
-  }
-}
-
-function loadStand(waveMesh) {
+async function loadStand(waveMesh) {
   /*
   var loader = new THREE.STLLoader();
   loader.load("../stand.stl", function(geometry) {
@@ -204,17 +201,10 @@ function loadStand(waveMesh) {
     })
   );
 
-  updateMesh(result);
+  return result;
 }
 
-function addCircle3DWaveForm(
-  values,
-  step,
-  color,
-  heightScale,
-  offset,
-  callback
-) {
+async function addCircle3DWaveForm(values, step, color, heightScale, offset) {
   var segmets = Number(document.getElementById("segmets").value);
 
   var points = [];
@@ -243,12 +233,10 @@ function addCircle3DWaveForm(
   //mesh.geometry.applyMatrix(new THREE.Matrix4().makeRotationY(180));
   mesh.geometry.applyMatrix(new THREE.Matrix4().makeRotationZ(4.71238898));
 
-  updateMesh(mesh);
-  callback(mesh);
-  //exportMesh = mesh;
+  return mesh;
 }
 
-function addFlat3DWaveForm(values, step, color, heightScale, offset, callback) {
+async function addFlat3DWaveForm(values, step, color, heightScale, offset) {
   var depth = Number(document.getElementById("flatDepth").value);
   var side;
   var radios = document.getElementsByName("side");
@@ -305,8 +293,7 @@ function addFlat3DWaveForm(values, step, color, heightScale, offset, callback) {
     })
   );
 
-  updateMesh(mesh);
-  callback(mesh);
+  return mesh;
   /*
   //HELPERS
   var edges = new THREE.EdgesGeometry(mesh.geometry);
@@ -321,7 +308,11 @@ function addFlat3DWaveForm(values, step, color, heightScale, offset, callback) {
   */
 }
 
-function addText(
+async function addTextWrapper(mesh, textLocal, depth, textSize, type, x, y, z) {
+  return await addText(mesh, textLocal, depth, textSize, type, x, y, z);
+}
+
+async function addText(
   mesh,
   textLocal,
   depth,
@@ -333,17 +324,16 @@ function addText(
   rx,
   ry,
   rz,
-  s,
-  callback
+  s
 ) {
-  var mesh_bsp = new ThreeBSP(mesh);
   var fontLoader = new THREE.FontLoader();
-  fontLoader.load("/font2.json", function(tex) {
+  var font = await fontLoader.load("/font2.json", function(tex) {
+    var mesh_bsp = new ThreeBSP(mesh);
     var textGeo = new THREE.TextGeometry(textLocal, {
       size: textSize,
       height: depth,
       curveSegments: 6,
-      font: tex
+      font: tex //new THREE.Font(g_font)
     });
 
     var textMaterial = new THREE.MeshPhongMaterial({
@@ -362,7 +352,7 @@ function addText(
     } else {
       var subtract_bsp = mesh_bsp.union(text_bsp);
     }
-    var result = subtract_bsp.toMesh(
+    result = subtract_bsp.toMesh(
       new THREE.MeshPhongMaterial({
         color: 0xff0000,
         shininess: 66,
@@ -373,86 +363,31 @@ function addText(
     );
     result.geometry.computeVertexNormals();
 
-    callback(result);
+    return result;
+
     //scene.add(text);
   });
+  console.log(font);
 }
+
+var g_font = "/font2.json";
+document.getElementById("fontFile").addEventListener("change", e => {
+  var file = e.target.files[0];
+  var fileReader = new FileReader();
+  fileReader.readAsText(file);
+  fileReader.onload = (function(text) {
+    return function() {
+      g_font = text.result;
+    };
+  })(fileReader);
+});
 
 function updateMesh(newMesh) {
   scene.remove(currentWaveFormMesh);
   currentWaveFormMesh = newMesh;
   scene.add(newMesh);
 }
-//CUTTING EXAMPLE
-/*
-var cube_geometry = new THREE.CubeGeometry(3, 3, 3);
-var cube_mesh = new THREE.Mesh(cube_geometry);
-//scene.add(cube_mesh);
-cube_mesh.position.x = -7;
-var cube_bsp = new ThreeBSP(cube_mesh);
-var sphere_geometry = new THREE.CylinderGeometry(0.5, 0.5, 20, 32);
-var sphere_mesh = new THREE.Mesh(sphere_geometry);
-//scene.add(sphere_mesh);
-sphere_mesh.position.x = -7;
 
-var sphere_bsp = new ThreeBSP(sphere_mesh);
-
-var subtract_bsp = cube_bsp.subtract(sphere_bsp);
-var result = subtract_bsp.toMesh(
-  new THREE.MeshPhongMaterial({
-    color: 0xff0000,
-    shininess: 66,
-    opacity: 0.3,
-    transparent: true,
-    side: THREE.DoubleSide
-  })
-);
-//result.geometry.computeVertexNormals();
-result.position.x = 5;
-scene.add(result);
-
-//FONT ADDING
-var cube_geometry = new THREE.CubeGeometry(50, 25, 3);
-var cube_mesh = new THREE.Mesh(cube_geometry);
-//scene.add(cube_mesh);
-cube_mesh.position.x = 0;
-var cube_bsp = new ThreeBSP(cube_mesh);
-
-var fontLoader = new THREE.FontLoader();
-fontLoader.load("/font.json", function(tex) {
-  var textGeo = new THREE.TextGeometry("Test", {
-    size: 10,
-    height: 5,
-    curveSegments: 6,
-    font: tex
-  });
-
-  var textMaterial = new THREE.MeshPhongMaterial({
-    color: 0xff0000,
-    shininess: 66,
-    opacity: 0.3,
-    transparent: true,
-    side: THREE.DoubleSide
-  });
-  var text = new THREE.Mesh(textGeo, textMaterial);
-  var text_bsp = new ThreeBSP(text);
-  var subtract_bsp = cube_bsp.subtract(text_bsp);
-  var result = subtract_bsp.toMesh(
-    new THREE.MeshPhongMaterial({
-      color: 0xff0000,
-      shininess: 66,
-      opacity: 0.3,
-      transparent: true,
-      side: THREE.DoubleSide
-    })
-  );
-  //result.geometry.computeVertexNormals();
-  result.position.x = 5;
-  exportMesh = result;
-  scene.add(result);
-  //scene.add(text);
-});
-*/
 //HELPER FUNCTION
 function rotateObject(mesh, degreeX = 0, degreeY = 0, degreeZ = 0) {
   mesh.rotateX(THREE.Math.degToRad(degreeX));
