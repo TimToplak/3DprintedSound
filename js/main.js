@@ -81,7 +81,7 @@ async function add3DWaveformFromData(values) {
   } else {
     waveFormMesh = await addCircle3DWaveForm(
       values,
-      1,
+      step,
       0xff0000,
       heightScale,
       offset
@@ -106,7 +106,7 @@ async function add3DWaveformFromData(values) {
       }
     }
 
-    var TextWaveFormMesh = await addTextWrapper(
+    waveFormMesh = await addText(
       waveFormMesh,
       text,
       textDepth,
@@ -120,14 +120,12 @@ async function add3DWaveformFromData(values) {
       0,
       1
     );
-    console.log(TextWaveFormMesh);
-    scene.add(TextWaveFormMesh);
   }
 
   if (document.getElementById("addStand").checked) {
     waveFormMesh = await loadStand(waveFormMesh);
   }
-  scene.add(waveFormMesh);
+  updateMesh(waveFormMesh);
   //
 }
 
@@ -250,7 +248,6 @@ async function addFlat3DWaveForm(values, step, color, heightScale, offset) {
   var points = [];
   points.push(new THREE.Vector2(0, 0));
 
-  console.log(typeof heightScale);
   var stepValue = step;
   for (let i = 0; i < values.length; i++) {
     points.push(new THREE.Vector2(stepValue, values[i] * heightScale + offset));
@@ -308,8 +305,10 @@ async function addFlat3DWaveForm(values, step, color, heightScale, offset) {
   */
 }
 
-async function addTextWrapper(mesh, textLocal, depth, textSize, type, x, y, z) {
-  return await addText(mesh, textLocal, depth, textSize, type, x, y, z);
+function loadFont(url) {
+  return new Promise(resolve => {
+    new THREE.FontLoader().load(url, resolve);
+  });
 }
 
 async function addText(
@@ -326,48 +325,50 @@ async function addText(
   rz,
   s
 ) {
-  var fontLoader = new THREE.FontLoader();
-  var font = await fontLoader.load("/font2.json", function(tex) {
-    var mesh_bsp = new ThreeBSP(mesh);
-    var textGeo = new THREE.TextGeometry(textLocal, {
-      size: textSize,
-      height: depth,
-      curveSegments: 6,
-      font: tex //new THREE.Font(g_font)
-    });
+  var font;
+  if (document.getElementById("addFontFromFile").checked) {
+    font = new THREE.FontLoader().parse(JSON.parse(g_font));
+  } else {
+    font = await loadFont("/font2.json");
+  }
+  console.log(font);
 
-    var textMaterial = new THREE.MeshPhongMaterial({
+  var mesh_bsp = new ThreeBSP(mesh);
+  var textGeo = new THREE.TextGeometry(textLocal, {
+    size: textSize,
+    height: depth,
+    curveSegments: 6,
+    font: font //new THREE.Font(g_font)
+  });
+
+  var textMaterial = new THREE.MeshPhongMaterial({
+    color: 0xffff00,
+    shininess: 66,
+    opacity: 0.3,
+    transparent: true,
+    side: THREE.DoubleSide
+  });
+  var text = new THREE.Mesh(textGeo, textMaterial);
+  text.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(x, y, z));
+
+  var text_bsp = new ThreeBSP(text);
+  if (type == "subtract") {
+    var subtract_bsp = mesh_bsp.subtract(text_bsp);
+  } else {
+    var subtract_bsp = mesh_bsp.union(text_bsp);
+  }
+  result = subtract_bsp.toMesh(
+    new THREE.MeshPhongMaterial({
       color: 0xff0000,
       shininess: 66,
       opacity: 0.3,
       transparent: true,
       side: THREE.DoubleSide
-    });
-    var text = new THREE.Mesh(textGeo, textMaterial);
-    text.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(x, y, z));
+    })
+  );
+  result.geometry.computeVertexNormals();
 
-    var text_bsp = new ThreeBSP(text);
-    if (type == "subtract") {
-      var subtract_bsp = mesh_bsp.subtract(text_bsp);
-    } else {
-      var subtract_bsp = mesh_bsp.union(text_bsp);
-    }
-    result = subtract_bsp.toMesh(
-      new THREE.MeshPhongMaterial({
-        color: 0xff0000,
-        shininess: 66,
-        opacity: 0.3,
-        transparent: true,
-        side: THREE.DoubleSide
-      })
-    );
-    result.geometry.computeVertexNormals();
-
-    return result;
-
-    //scene.add(text);
-  });
-  console.log(font);
+  return result;
 }
 
 var g_font = "/font2.json";
@@ -382,7 +383,7 @@ document.getElementById("fontFile").addEventListener("change", e => {
   })(fileReader);
 });
 
-function updateMesh(newMesh) {
+async function updateMesh(newMesh) {
   scene.remove(currentWaveFormMesh);
   currentWaveFormMesh = newMesh;
   scene.add(newMesh);
@@ -424,6 +425,10 @@ var currentWaveFormData = null;
 var currentAudioBuffer = null;
 var startAudioTime;
 var endAudioTime;
+
+var startAudioTimeTemp;
+var endAudioTimeTemp;
+
 var audioDuration;
 
 svg.addEventListener("click", e => {
@@ -432,8 +437,7 @@ svg.addEventListener("click", e => {
 });
 
 document.getElementById("playPauseAudio").addEventListener("click", function() {
-  audio.currentTime =
-    startAudioTime + audioDuration * normalizedLeftCutterPosition;
+  audio.currentTime = startAudioTime;
   audio.play();
 });
 
@@ -553,12 +557,14 @@ function attachToAudio(file) {
 }
 audio.addEventListener("loadeddata", function() {
   startAudioTime = 0;
+  startAudioTimeTemp = 0;
   endAudioTime = audio.duration;
+  endAudioTimeTemp = audio.duration;
   audioDuration = audio.duration;
 });
 function updateAudioPosition() {
-  const { currentTime, duration } = audio;
-  const physicalPosition = (currentTime / audioDuration) * width;
+  const physicalPosition =
+    ((audio.currentTime - startAudioTimeTemp) / audioDuration) * width;
   if (physicalPosition) {
     progress.setAttribute("width", physicalPosition);
     remaining.setAttribute("x", physicalPosition);
@@ -615,9 +621,12 @@ function initCutting() {
   //recalculate values of audio buffer
   var cutAudioButton = document.getElementById("cutAudioButton");
   cutAudioButton.addEventListener("click", function() {
-    startAudioTime = audioDuration * normalizedLeftCutterPosition;
-    endAudioTime = audioDuration * normalizedRightCutterPosition;
-    audioDuration = endAudioTime - startAudioTime;
+    startAudioTimeTemp =
+      startAudioTimeTemp + audioDuration * normalizedLeftCutterPosition;
+    endAudioTimeTemp =
+      endAudioTimeTemp -
+      (audioDuration - audioDuration * normalizedRightCutterPosition);
+    audioDuration = endAudioTimeTemp - startAudioTimeTemp;
 
     currentWaveFormData = getWaveformData(
       currentAudioBuffer,
@@ -691,7 +700,8 @@ function initCutting() {
           "px";
         normalizedLeftCutterPosition =
           leftAudioCutter.offsetLeft / audioCuttingWindow.offsetWidth;
-        startAudioTime = audioDuration * normalizedLeftCutterPosition;
+        startAudioTime =
+          startAudioTimeTemp + audioDuration * normalizedLeftCutterPosition;
       }
 
       if (elmnt.id == "rightAudioCutter") {
@@ -712,11 +722,13 @@ function initCutting() {
           "px";
         normalizedRightCutterPosition =
           (rightAudioCutter.offsetLeft + 22) / audioCuttingWindow.offsetWidth;
-        endAudioTime = audioDuration * normalizedRightCutterPosition;
-        console.log(endAudioTime);
-        console.log(audio.currentTime);
+        endAudioTime =
+          endAudioTimeTemp -
+          (audioDuration - audioDuration * normalizedRightCutterPosition);
       }
 
+      console.log(endAudioTime);
+      console.log(audio.currentTime);
       console.log("Left: " + normalizedLeftCutterPosition);
       console.log("Right: " + normalizedRightCutterPosition);
     }
@@ -745,3 +757,13 @@ $(".tabs-nav a").on("click", function(event) {
   $(".tabs-stage div").hide();
   $($(this).attr("href")).show();
 });
+
+var colorWaveForm = document.querySelector("#colorWaveForm");
+var picker = new Picker(colorWaveForm);
+
+/*
+    You can do what you want with the chosen color using two callbacks: onChange and onDone.
+*/
+picker.onChange = function(color) {
+  colorWaveForm.style.background = color.rgbaString;
+};

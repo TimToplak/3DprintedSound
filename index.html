@@ -25,7 +25,7 @@
         >
           <linearGradient id="Gradient" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stop-color="white" />
-            <stop offset="90%" stop-color="white" stop-opacity="0.75" />
+            <stop offset="95%" stop-color="white" stop-opacity="0.75" />
             <stop offset="100%" stop-color="white" stop-opacity="0" />
           </linearGradient>
           <mask id="Mask">
@@ -60,12 +60,13 @@
 
     <div id="audio3DControls">
       <div class="block">
-        <canvas height="1000px" width="1300px" id="canvasID"></canvas>
+        <canvas height="800px" width="1300px" id="canvasID"></canvas>
       </div>
       <div class="block">
         Step: <input type="number" value="1" id="step" />
         <br />
         Color of plastic:
+        <div id="colorWaveForm">Click me</div>
         <br />
         Offset: <input id="offset" type="number" value="0" />
         <br />
@@ -93,11 +94,12 @@
             </div>
           </div>
         </div>
-        <input type="checkbox" id="addTextFlat" /> add text
+        <input checked type="checkbox" id="addTextFlat" /> add text
         <br />
         <input type="text" id="textFlat" value="test" />
         <br />
-        Font from file: <input type="file" id="fontFile" />
+        <input checked type="checkbox" id="addFontFromFile" /> font from file:
+        <input type="file" id="fontFile" />
         <br />
         Type:
         <br />
@@ -119,7 +121,7 @@
         <br />
         Z: <input id="flatZtext" type="number" value="0" />
         <br />
-        <input type="checkbox" id="addStand" checked /> add stand
+        <input type="checkbox" id="addStand" /> add stand
         <br />
         Move standhole:
         <br />
@@ -153,6 +155,7 @@
     <script src="js/lib/ThreeCSG.js"></script>
     <script src="js/lib/STLLoader.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/vanilla-picker@2"></script>
 
     <script src="js/main.js"></script>
   </body>
