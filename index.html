@@ -38,7 +38,7 @@
             y="0"
             width="0"
             height="100"
-            fill="rgb(255, 255, 106)"
+            fill="rgb(250, 50, 0)"
           />
           <rect
             id="remaining"
@@ -47,31 +47,35 @@
             y="0"
             width="0"
             height="100"
-            fill="rgb(255, 56, 56)"
+            fill="rgb(250, 184, 1)"
           />
         </svg>
       </div>
 
       <button id="cutAudioButton">Cut audio</button>
       <button id="playPauseAudio">Play/Pause</button>
-      <button id="vizualizeCutWindow">Vizualize sound between cutters</button>
     </div>
     <br />
 
     <div id="audio3DControls">
+      <canvas height="800px" width="1300px" id="canvasID"></canvas>
       <div class="block">
-        <canvas height="800px" width="1300px" id="canvasID"></canvas>
-      </div>
-      <div class="block">
-        Step: <input type="number" value="1" id="step" />
+        <button id="vizualizeCutWindow">
+          generate 3d waveform between cutters
+        </button>
         <br />
-        Color of plastic:
-        <div id="colorWaveForm">Click me</div>
         <br />
-        Offset: <input id="offset" type="number" value="0" />
-        <br />
-        Height scale: <input id="heightScale" type="number" value="50" />
-        <br />
+        <div class="controls">
+          Step: <input type="number" value="1" id="step" />
+          <br />
+          Color of plastic:
+          <div style="width: 90px" id="colorWaveForm">Click me</div>
+
+          Offset: <input id="offset" type="number" value="0" />
+          <br />
+          Height scale: <input id="heightScale" type="number" value="50" />
+          <br />
+        </div>
 
         <div class="tabs">
           <ul class="tabs-nav">
@@ -87,64 +91,87 @@
               <br />
               <input type="radio" name="side" value="one" /> One<br />
               <input type="radio" name="side" checked value="two" />
-              Two<br /><br />
+              Two<br />
             </div>
             <div id="tab-2">
               Segments: <input id="segmets" type="number" value="15" />
             </div>
           </div>
         </div>
-        <input checked type="checkbox" id="addTextFlat" /> add text
-        <br />
-        <input type="text" id="textFlat" value="test" />
-        <br />
-        <input checked type="checkbox" id="addFontFromFile" /> font from file:
-        <input type="file" id="fontFile" />
-        <br />
-        Type:
-        <br />
-        <input type="radio" name="textTypeFlat" value="subtract" />
-        Subtract<br />
-        <input type="radio" name="textTypeFlat" checked value="union" />
-        Union<br />
-        Text depth:
-        <input type="number" id="textDepth" value="8" />
-        <br />
-        Text size:
-        <input type="number" id="textSize" value="10" />
-        <br />
-        Move text:
-        <br />
-        X: <input id="flatXtext" type="number" value="0" />
-        <br />
-        Y: <input id="flatYtext" type="number" value="0" />
-        <br />
-        Z: <input id="flatZtext" type="number" value="0" />
-        <br />
-        <input type="checkbox" id="addStand" /> add stand
-        <br />
-        Move standhole:
-        <br />
-        Type:
-        <br />
-        <input type="radio" name="radiosCylinderType" value="subtract" />
-        Subtract<br />
-        <input type="radio" name="radiosCylinderType" checked value="union" />
-        Union<br />
-        <br />
-        Cylinder radius:
-        <input id="cylinderRadius" type="number" value="2" />
-        <br />
-        Clyinder height: <input id="cylinderHeight" type="number" value="5" />
-        <br />
-        X: <input id="cylinderX" type="number" value="0" />
-        <br />
-        Y: <input id="cylinderY" type="number" value="-5" />
-        <br />
-        Z: <input id="cylinderZ" type="number" value="4" />
-        <br />
+        <div class="controls">
+          <input checked type="checkbox" id="addTextFlat" /> add text
 
-        <button onclick="exportBinary()">export binary</button>
+          <br />
+          <input type="text" id="textFlat" value="test" />
+          <br />
+          <input type="checkbox" id="addFontFromFile" /> font from file:
+          <input type="file" id="fontFile" />
+          <br />
+          Type:
+          <div class="controls">
+            <input type="radio" name="textTypeFlat" value="subtract" />
+            Subtract<br />
+            <input type="radio" name="textTypeFlat" checked value="union" />
+            Union<br />
+          </div>
+          Text depth:
+          <input type="number" id="textDepth" value="8" />
+          <br />
+          Text size:
+          <input type="number" id="textSize" value="10" />
+          <br />
+          Move text:
+          <br />
+          <div class="controls">
+            <span class="xspan">X</span>:
+            <input id="flatXtext" type="number" value="0" />
+            <br />
+            <span class="yspan">Y</span>:
+            <input id="flatYtext" type="number" value="0" />
+            <br />
+            <span class="zspan"> Z</span>:
+            <input id="flatZtext" type="number" value="0" />
+          </div>
+        </div>
+        <hr class="line" align="left" width="100%" />
+        <div class="controls">
+          <input type="checkbox" id="addStand" /> add stand
+          <br />
+          Cylinder radius:
+          <input id="cylinderRadius" type="number" value="2" />
+          <br />
+          Clyinder height: <input id="cylinderHeight" type="number" value="5" />
+          <br />
+          Move standhole:
+          <br />
+          <div class="controls">
+            <span class="xspan">X</span>:
+            <input id="cylinderX" type="number" value="0" />
+            <br />
+            <span class="yspan">Y</span>:
+            <input id="cylinderY" type="number" value="-5" />
+            <br />
+            <span class="zspan"> Z</span>:
+            <input id="cylinderZ" type="number" value="4" />
+          </div>
+
+          Type:
+          <br />
+          <div class="controls">
+            <input type="radio" name="radiosCylinderType" value="subtract" />
+            Subtract<br />
+            <input
+              type="radio"
+              name="radiosCylinderType"
+              checked
+              value="union"
+            />
+            Union
+          </div>
+
+          <br />
+        </div>
+        <button onclick="exportBinary()">export .svg</button>
       </div>
     </div>
 

@@ -1,12 +1,16 @@
 body {
-  background: #eee;
+  background-color: black;
+  background-image: url("http://api.thumbr.it/whitenoise-1920x1080.png?background=1a1a1aff&noise=626262&density=82&opacity=15");
+
+  font-family: Arial, Helvetica, sans-serif;
+  color: white;
 }
 #leftAudioCutter {
   position: absolute;
   z-index: 9;
-  background-color: blue;
+  background-color: rgb(51, 51, 51);
   text-align: center;
-  border: 2px solid #d3d3d3;
+  border: 2px solid rgb(250, 184, 1);
   cursor: e-resize;
   height: 100px;
   width: 18px;
@@ -17,9 +21,9 @@ body {
 #rightAudioCutter {
   position: absolute;
   z-index: 9;
-  background-color: blue;
+  background-color: rgb(51, 51, 51);
   text-align: center;
-  border: 2px solid #d3d3d3;
+  border: 2px solid rgb(250, 184, 1);
   cursor: e-resize;
   height: 100px;
   width: 18px;
@@ -28,15 +32,16 @@ body {
 }
 
 #audioCuttingWindow {
-  background: rgba(177, 47, 47, 0.54);
+  background: rgb(112, 112, 112);
   position: relative;
   padding-left: 22px;
   padding-right: 22px;
+  border-radius: 10px;
 }
 
 #cutWindow {
   position: absolute;
-  background-color: rgba(85, 117, 246, 0.59);
+  background-color: rgba(145, 154, 190, 0.432);
   height: 100%;
   width: 100px;
   left: 18px;
@@ -58,12 +63,14 @@ body {
 #audio3DControls {
   margin-left: 2%;
   margin-right: 2%;
+  display: flex;
 }
 
 .block {
-  display: inline-block;
-  vertical-align: top;
-  border: 1px solid #a0a0a0;
+  /*display: inline-block;
+  vertical-align: top;*/
+  border: 1px solid rgb(250, 184, 1);
+  margin-left: 10px;
 }
 
 ul {
@@ -77,23 +84,25 @@ li {
 }
 
 .tabs {
-  width: 500px;
+  width: 100%;
 }
 .tabs-nav li {
   float: left;
   width: 50%;
 }
 .tabs-nav li:first-child a {
-  border-right: 1px solid #a0a0a0;
+  border-right: 1px solid rgb(250, 184, 1);
 }
+/*
 .tabs-nav li:last-child a {
   color: #ff7b29;
 }
+*/
 a {
-  background: #eaeaed;
-  border-top: 1px solid #a0a0a0;
-  border-bottom: 1px solid #a0a0a0;
-  color: #0087cc;
+  background: #3a3a3a;
+  border-top: 1px solid rgb(250, 184, 1);
+  border-bottom: 1px solid rgb(250, 184, 1);
+  color: white;
   display: block;
   font-weight: 600;
   padding: 10px 0;
@@ -101,20 +110,61 @@ a {
   text-decoration: none;
 }
 a:hover {
-  color: #ff7b29;
+  color: rgb(250, 184, 1);
 }
 .tab-active a {
-  background: #fff;
+  background: #575757;
   border-bottom-color: transparent;
-  color: black;
+  color: rgb(250, 184, 1);
   cursor: default;
 }
 .tabs-stage {
-  border-top: 1px solid #a0a0a0;
-  border-bottom: 1px solid #a0a0a0;
+  border-top: 1px solid rgb(250, 184, 1);
+  border-bottom: 1px solid rgb(250, 184, 1);
   border-top: 0;
   clear: both;
-  padding: 24px 30px;
+  padding: 12px 12px;
   position: relative;
   top: -1px;
+}
+
+button:hover {
+  background-color: #575757;
+  color: rgb(250, 184, 1);
+}
+
+button {
+  color: white;
+  padding: 0.5em;
+  margin: 1em auto;
+  background-color: #3a3a3a;
+  cursor: pointer;
+  border: none;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5em;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.controls {
+  padding-left: 12px;
+}
+
+.xspan {
+  color: red;
+}
+
+.yspan {
+  color: lawngreen;
+}
+
+.zspan {
+  color: blue;
+}
+
+.line {
+  border-top: 1px solid rgb(250, 184, 1);
+  border-left: 0;
+  border-bottom: 0;
+  border-right: 0;
 }
