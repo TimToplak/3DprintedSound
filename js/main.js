@@ -1,6 +1,6 @@
 var canvas = document.getElementById("canvasID");
 var renderer = new THREE.WebGLRenderer({ canvas: canvas });
-renderer.setSize(canvas.width, canvas.height);
+//renderer.setSize(canvas.width, canvas.height);
 
 var currentWaveFormMesh;
 var scene = new THREE.Scene();
@@ -60,10 +60,94 @@ var link = document.createElement("a");
 link.style.display = "none";
 document.body.appendChild(link);
 
+var w;
+function add3DWaveForm(values) {
+  var data = {};
+  data.values = values;
+  data.step = Number(document.getElementById("step").value);
+  data.offset = Number(document.getElementById("offset").value);
+  data.heightScale = Number(document.getElementById("heightScale").value);
+
+  var red = 255;
+  var green = 0;
+  var blue = 0;
+  var opacity = 1;
+
+  if (picker.color._rgba != null) {
+    red = picker.color._rgba[0];
+    green = picker.color._rgba[1];
+    blue = picker.color._rgba[2];
+    opacity = picker.color._rgba[3];
+  }
+
+  data.material = new THREE.MeshPhongMaterial({
+    color: new THREE.Color("rgb(" + red + ", " + green + ", " + blue + ")"),
+    shininess: 66,
+    opacity: opacity,
+    transparent: true,
+    side: THREE.DoubleSide
+  });
+
+  data.waveFormType = document
+    .getElementsByClassName("tab-active")[0]
+    .getAttribute("value");
+
+  var typeCircle = {};
+  var typeFlat = {};
+  if (data.waveFormType == "flat") {
+    typeFlat.depth = Number(document.getElementById("flatDepth").value);
+    var radios = document.getElementsByName("side");
+    for (var i = 0, length = radios.length; i < length; i++) {
+      if (radios[i].checked) {
+        typeFlat.side = radios[i].value;
+        break;
+      }
+    }
+  } else {
+    typeCircle.segmets = Number(document.getElementById("segmets").value);
+  }
+
+  data.typeFlat = typeFlat;
+  data.typeCircle = typeCircle;
+
+  if (typeof Worker !== "undefined") {
+    if (typeof w == "undefined") {
+      w = new Worker("../js/mesh_worker.js");
+    }
+    w.onmessage = function(event) {
+      console.log(event.data);
+    };
+
+    w.postMessage(data);
+  } else {
+    alert("Sorry! No Web Worker support, try using newest ");
+  }
+}
+
 async function add3DWaveformFromData(values) {
   var step = Number(document.getElementById("step").value);
   var offset = Number(document.getElementById("offset").value);
   var heightScale = Number(document.getElementById("heightScale").value);
+
+  var red = 255;
+  var green = 0;
+  var blue = 0;
+  var opacity = 1;
+
+  if (picker.color._rgba != null) {
+    red = picker.color._rgba[0];
+    green = picker.color._rgba[1];
+    blue = picker.color._rgba[2];
+    opacity = picker.color._rgba[3];
+  }
+
+  g_material = new THREE.MeshPhongMaterial({
+    color: new THREE.Color("rgb(" + red + ", " + green + ", " + blue + ")"),
+    shininess: 66,
+    opacity: opacity,
+    transparent: true,
+    side: THREE.DoubleSide
+  });
 
   var waveFormType = document
     .getElementsByClassName("tab-active")[0]
@@ -189,15 +273,7 @@ async function loadStand(waveMesh) {
   } else {
     var subtract_bsp = mesh_bsp.union(cylinder_bsp);
   }
-  var result = subtract_bsp.toMesh(
-    new THREE.MeshPhongMaterial({
-      color: 0xff0000,
-      shininess: 66,
-      opacity: 0.3,
-      transparent: true,
-      side: THREE.DoubleSide
-    })
-  );
+  var result = subtract_bsp.toMesh(g_material);
 
   return result;
 }
@@ -217,16 +293,7 @@ async function addCircle3DWaveForm(values, step, color, heightScale, offset) {
 
   var geometry = new THREE.LatheGeometry(points, segmets);
 
-  var mesh = new THREE.Mesh(
-    geometry,
-    new THREE.MeshPhongMaterial({
-      color: 0xff0000,
-      shininess: 66,
-      opacity: 0.3,
-      transparent: true,
-      side: THREE.DoubleSide
-    })
-  );
+  var mesh = new THREE.Mesh(geometry, g_material);
 
   //mesh.geometry.applyMatrix(new THREE.Matrix4().makeRotationY(180));
   mesh.geometry.applyMatrix(new THREE.Matrix4().makeRotationZ(4.71238898));
@@ -279,16 +346,7 @@ async function addFlat3DWaveForm(values, step, color, heightScale, offset) {
   //work around, so that THREEBSP works
   var test = new THREE.Geometry().fromBufferGeometry(geometry);
 
-  var mesh = new THREE.Mesh(
-    test,
-    new THREE.MeshPhongMaterial({
-      color: color,
-      shininess: 66,
-      opacity: 0.3,
-      transparent: true,
-      side: THREE.DoubleSide
-    })
-  );
+  var mesh = new THREE.Mesh(test, g_material);
 
   return mesh;
   /*
@@ -341,14 +399,7 @@ async function addText(
     font: font //new THREE.Font(g_font)
   });
 
-  var textMaterial = new THREE.MeshPhongMaterial({
-    color: 0xffff00,
-    shininess: 66,
-    opacity: 0.3,
-    transparent: true,
-    side: THREE.DoubleSide
-  });
-  var text = new THREE.Mesh(textGeo, textMaterial);
+  var text = new THREE.Mesh(textGeo, g_material);
   text.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(x, y, z));
 
   var text_bsp = new ThreeBSP(text);
@@ -357,15 +408,7 @@ async function addText(
   } else {
     var subtract_bsp = mesh_bsp.union(text_bsp);
   }
-  result = subtract_bsp.toMesh(
-    new THREE.MeshPhongMaterial({
-      color: 0xff0000,
-      shininess: 66,
-      opacity: 0.3,
-      transparent: true,
-      side: THREE.DoubleSide
-    })
-  );
+  result = subtract_bsp.toMesh(g_material);
   result.geometry.computeVertexNormals();
 
   return result;
@@ -758,8 +801,14 @@ $(".tabs-nav a").on("click", function(event) {
   $($(this).attr("href")).show();
 });
 
+//COLOR PICKER
+var g_material;
 var colorWaveForm = document.querySelector("#colorWaveForm");
-var picker = new Picker(colorWaveForm);
+var picker = new Picker({
+  parent: colorWaveForm,
+  popup: "bottom",
+  color: "#ffffff"
+});
 
 /*
     You can do what you want with the chosen color using two callbacks: onChange and onDone.

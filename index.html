@@ -2,178 +2,241 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>3D sound</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
     <link rel="stylesheet" type="text/css" href="css/mystyle.css" />
   </head>
   <body>
-    <div id="audio2DControls">
-      <input type="file" /><br />
-      <button id="record">Record</button>
-      <button id="stop">Stop</button>
-      <div id="audioCuttingWindow">
-        <div id="leftAudioCutter"></div>
-        <div id="rightAudioCutter"></div>
-        <div id="cutWindow"></div>
-        <svg
-          id="SVG2DWaveform"
-          preserveAspectRatio="none"
-          width="2000"
-          height="100"
-          style="width:100%;height:100px;"
-          xmlns="http://www.w3.org/2000/svg"
-          xmlns:xlink="http://www.w3.org/1999/xlink"
-        >
-          <linearGradient id="Gradient" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stop-color="white" />
-            <stop offset="95%" stop-color="white" stop-opacity="0.75" />
-            <stop offset="100%" stop-color="white" stop-opacity="0" />
-          </linearGradient>
-          <mask id="Mask">
-            <path fill="url(#Gradient)" />
-          </mask>
-          <rect
-            id="progress"
-            mask="url(#Mask)"
-            x="0"
-            y="0"
-            width="0"
-            height="100"
-            fill="rgb(250, 50, 0)"
-          />
-          <rect
-            id="remaining"
-            mask="url(#Mask)"
-            x="0"
-            y="0"
-            width="0"
-            height="100"
-            fill="rgb(250, 184, 1)"
-          />
-        </svg>
-      </div>
-
-      <button id="cutAudioButton">Cut audio</button>
-      <button id="playPauseAudio">Play/Pause</button>
-    </div>
-    <br />
-
-    <div id="audio3DControls">
-      <canvas height="800px" width="1300px" id="canvasID"></canvas>
-      <div class="block">
-        <button id="vizualizeCutWindow">
-          generate 3d waveform between cutters
-        </button>
-        <br />
-        <br />
-        <div class="controls">
-          Step: <input type="number" value="1" id="step" />
-          <br />
-          Color of plastic:
-          <div style="width: 90px" id="colorWaveForm">Click me</div>
-
-          Offset: <input id="offset" type="number" value="0" />
-          <br />
-          Height scale: <input id="heightScale" type="number" value="50" />
-          <br />
-        </div>
-
-        <div class="tabs">
-          <ul class="tabs-nav">
-            <li value="flat"><a href="#tab-1">Flat</a></li>
-            <li value="circle"><a href="#tab-2">Circle</a></li>
-          </ul>
-          <div class="tabs-stage">
-            <div id="tab-1">
-              Depth: <input id="flatDepth" type="number" value="8" />
-              <br />
-
-              Sides:
-              <br />
-              <input type="radio" name="side" value="one" /> One<br />
-              <input type="radio" name="side" checked value="two" />
-              Two<br />
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col">
+          <div id="audio2DControls">
+            <input type="file" /><br />
+            <button id="record">Record</button>
+            <button id="stop">Stop</button>
+            <div id="audioCuttingWindow">
+              <div id="leftAudioCutter"></div>
+              <div id="rightAudioCutter"></div>
+              <div id="cutWindow"></div>
+              <svg
+                id="SVG2DWaveform"
+                preserveAspectRatio="none"
+                width="2000"
+                height="100"
+                style="width:100%;height:100px;"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+              >
+                <linearGradient id="Gradient" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="white" />
+                  <stop offset="95%" stop-color="white" stop-opacity="0.75" />
+                  <stop offset="100%" stop-color="white" stop-opacity="0" />
+                </linearGradient>
+                <mask id="Mask">
+                  <path fill="url(#Gradient)" />
+                </mask>
+                <rect
+                  id="progress"
+                  mask="url(#Mask)"
+                  x="0"
+                  y="0"
+                  width="0"
+                  height="100"
+                  fill="rgb(250, 50, 0)"
+                />
+                <rect
+                  id="remaining"
+                  mask="url(#Mask)"
+                  x="0"
+                  y="0"
+                  width="0"
+                  height="100"
+                  fill="rgb(250, 184, 1)"
+                />
+              </svg>
             </div>
-            <div id="tab-2">
-              Segments: <input id="segmets" type="number" value="15" />
+
+            <button id="cutAudioButton">Cut audio</button>
+            <button id="playPauseAudio">Play/Pause</button>
+          </div>
+        </div>
+        <br />
+      </div>
+      <div class="row">
+        <div class="col">
+          <canvas height="750" width="1080" id="canvasID"></canvas>
+        </div>
+        <div class="col col-lg-4">
+          <div id="audio3DControls">
+            <div class="block">
+              <button id="vizualizeCutWindow">
+                generate 3d waveform between cutters
+              </button>
+              <br />
+              <br />
+              <div class="controls">
+                Step: <input type="number" value="1" id="step" />
+                <br />
+
+                <div style="width: 90px" id="colorWaveForm">
+                  Color of plastic
+                </div>
+
+                Offset: <input id="offset" type="number" value="0" />
+                <br />
+                Height scale:
+                <input id="heightScale" type="number" value="50" />
+                <br />
+              </div>
+
+              <div class="tabs">
+                <ul class="tabs-nav">
+                  <li value="flat"><a href="#tab-1">Flat</a></li>
+                  <li value="circle"><a href="#tab-2">Circle</a></li>
+                </ul>
+                <div class="tabs-stage">
+                  <div id="tab-1">
+                    Depth: <input id="flatDepth" type="number" value="8" />
+                    <br />
+
+                    Sides:
+                    <br />
+                    <input type="radio" name="side" value="one" /> One<br />
+                    <input type="radio" name="side" checked value="two" />
+                    Two<br />
+                  </div>
+                  <div id="tab-2">
+                    Segments: <input id="segmets" type="number" value="15" />
+                  </div>
+                </div>
+              </div>
+              <div class="controls">
+                <input checked type="checkbox" id="addTextFlat" /> add text
+
+                <br />
+                <input type="text" id="textFlat" value="test" />
+                <br />
+                <input type="checkbox" id="addFontFromFile" /> font from file:
+                <input type="file" id="fontFile" />
+                <br />
+                Type:
+                <div class="controls">
+                  <input type="radio" name="textTypeFlat" value="subtract" />
+                  Subtract<br />
+                  <input
+                    type="radio"
+                    name="textTypeFlat"
+                    checked
+                    value="union"
+                  />
+                  Union<br />
+                </div>
+                Text depth:
+                <input type="number" id="textDepth" value="8" />
+                <br />
+                Text size:
+                <input type="number" id="textSize" value="10" />
+                <br />
+                Move text:
+                <br />
+                <div class="controls">
+                  <span class="xspan">X</span>:
+                  <input id="flatXtext" type="number" value="0" />
+                  <br />
+                  <span class="yspan">Y</span>:
+                  <input id="flatYtext" type="number" value="0" />
+                  <br />
+                  <span class="zspan"> Z</span>:
+                  <input id="flatZtext" type="number" value="0" />
+                </div>
+              </div>
+              <hr class="line" align="left" width="100%" />
+              <div class="controls">
+                <input type="checkbox" id="addStand" /> add stand
+                <br />
+                Cylinder radius:
+                <input id="cylinderRadius" type="number" value="2" />
+                <br />
+                Clyinder height:
+                <input id="cylinderHeight" type="number" value="5" />
+                <br />
+                Move standhole:
+                <br />
+                <div class="controls">
+                  <span class="xspan">X</span>:
+                  <input id="cylinderX" type="number" value="0" />
+                  <br />
+                  <span class="yspan">Y</span>:
+                  <input id="cylinderY" type="number" value="-5" />
+                  <br />
+                  <span class="zspan"> Z</span>:
+                  <input id="cylinderZ" type="number" value="4" />
+                </div>
+
+                Type:
+                <br />
+                <div class="controls">
+                  <input
+                    type="radio"
+                    name="radiosCylinderType"
+                    value="subtract"
+                  />
+                  Subtract<br />
+                  <input
+                    type="radio"
+                    name="radiosCylinderType"
+                    checked
+                    value="union"
+                  />
+                  Union
+                </div>
+
+                <br />
+              </div>
+              <button onclick="exportBinary()">export .svg</button>
             </div>
           </div>
         </div>
-        <div class="controls">
-          <input checked type="checkbox" id="addTextFlat" /> add text
-
-          <br />
-          <input type="text" id="textFlat" value="test" />
-          <br />
-          <input type="checkbox" id="addFontFromFile" /> font from file:
-          <input type="file" id="fontFile" />
-          <br />
-          Type:
-          <div class="controls">
-            <input type="radio" name="textTypeFlat" value="subtract" />
-            Subtract<br />
-            <input type="radio" name="textTypeFlat" checked value="union" />
-            Union<br />
-          </div>
-          Text depth:
-          <input type="number" id="textDepth" value="8" />
-          <br />
-          Text size:
-          <input type="number" id="textSize" value="10" />
-          <br />
-          Move text:
-          <br />
-          <div class="controls">
-            <span class="xspan">X</span>:
-            <input id="flatXtext" type="number" value="0" />
-            <br />
-            <span class="yspan">Y</span>:
-            <input id="flatYtext" type="number" value="0" />
-            <br />
-            <span class="zspan"> Z</span>:
-            <input id="flatZtext" type="number" value="0" />
-          </div>
-        </div>
-        <hr class="line" align="left" width="100%" />
-        <div class="controls">
-          <input type="checkbox" id="addStand" /> add stand
-          <br />
-          Cylinder radius:
-          <input id="cylinderRadius" type="number" value="2" />
-          <br />
-          Clyinder height: <input id="cylinderHeight" type="number" value="5" />
-          <br />
-          Move standhole:
-          <br />
-          <div class="controls">
-            <span class="xspan">X</span>:
-            <input id="cylinderX" type="number" value="0" />
-            <br />
-            <span class="yspan">Y</span>:
-            <input id="cylinderY" type="number" value="-5" />
-            <br />
-            <span class="zspan"> Z</span>:
-            <input id="cylinderZ" type="number" value="4" />
-          </div>
-
-          Type:
-          <br />
-          <div class="controls">
-            <input type="radio" name="radiosCylinderType" value="subtract" />
-            Subtract<br />
-            <input
-              type="radio"
-              name="radiosCylinderType"
-              checked
-              value="union"
-            />
-            Union
-          </div>
-
-          <br />
-        </div>
-        <button onclick="exportBinary()">export .svg</button>
       </div>
     </div>
+
+    <div class="post-wrapper">
+      <div class="row">
+        <div class="col post">
+          test
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          test1
+        </div>
+        <div class="col">
+          test2
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
 
     <script src="js/lib/three.js"></script>
     <script src="js/lib/OrbitControls.js"></script>
