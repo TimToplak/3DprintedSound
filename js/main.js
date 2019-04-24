@@ -1,6 +1,5 @@
 var canvas = document.getElementById("canvasID");
 var renderer = new THREE.WebGLRenderer({ canvas: canvas });
-//renderer.setSize(canvas.width, canvas.height);
 
 var currentWaveFormMesh;
 var scene = new THREE.Scene();
@@ -25,7 +24,7 @@ rotateObject(plane, 90);
 plane.position.set(0, -100, 0);
 scene.add(plane);
 
-var axesHelper = new THREE.AxesHelper(5);
+var axesHelper = new THREE.AxesHelper(20);
 scene.add(axesHelper);
 
 var light = new THREE.DirectionalLight(0xffffff);
@@ -55,74 +54,6 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
-
-var link = document.createElement("a");
-link.style.display = "none";
-document.body.appendChild(link);
-
-var w;
-function add3DWaveForm(values) {
-  var data = {};
-  data.values = values;
-  data.step = Number(document.getElementById("step").value);
-  data.offset = Number(document.getElementById("offset").value);
-  data.heightScale = Number(document.getElementById("heightScale").value);
-
-  var red = 255;
-  var green = 0;
-  var blue = 0;
-  var opacity = 1;
-
-  if (picker.color._rgba != null) {
-    red = picker.color._rgba[0];
-    green = picker.color._rgba[1];
-    blue = picker.color._rgba[2];
-    opacity = picker.color._rgba[3];
-  }
-
-  data.material = new THREE.MeshPhongMaterial({
-    color: new THREE.Color("rgb(" + red + ", " + green + ", " + blue + ")"),
-    shininess: 66,
-    opacity: opacity,
-    transparent: true,
-    side: THREE.DoubleSide
-  });
-
-  data.waveFormType = document
-    .getElementsByClassName("tab-active")[0]
-    .getAttribute("value");
-
-  var typeCircle = {};
-  var typeFlat = {};
-  if (data.waveFormType == "flat") {
-    typeFlat.depth = Number(document.getElementById("flatDepth").value);
-    var radios = document.getElementsByName("side");
-    for (var i = 0, length = radios.length; i < length; i++) {
-      if (radios[i].checked) {
-        typeFlat.side = radios[i].value;
-        break;
-      }
-    }
-  } else {
-    typeCircle.segmets = Number(document.getElementById("segmets").value);
-  }
-
-  data.typeFlat = typeFlat;
-  data.typeCircle = typeCircle;
-
-  if (typeof Worker !== "undefined") {
-    if (typeof w == "undefined") {
-      w = new Worker("../js/mesh_worker.js");
-    }
-    w.onmessage = function(event) {
-      console.log(event.data);
-    };
-
-    w.postMessage(data);
-  } else {
-    alert("Sorry! No Web Worker support, try using newest ");
-  }
-}
 
 async function add3DWaveformFromData(values) {
   var step = Number(document.getElementById("step").value);
@@ -155,25 +86,13 @@ async function add3DWaveformFromData(values) {
 
   var waveFormMesh;
   if (waveFormType == "flat") {
-    waveFormMesh = await addFlat3DWaveForm(
-      values,
-      step,
-      0xff0000,
-      heightScale,
-      offset
-    );
+    waveFormMesh = await addFlat3DWaveForm(values, step, heightScale, offset);
   } else {
-    waveFormMesh = await addCircle3DWaveForm(
-      values,
-      step,
-      0xff0000,
-      heightScale,
-      offset
-    );
+    waveFormMesh = await addCircle3DWaveForm(values, step, heightScale, offset);
   }
 
   console.log(waveFormMesh);
-
+  document.getElementById("loadingScreen").style.display = "block";
   if (document.getElementById("addTextFlat").checked) {
     var text = String(document.getElementById("textFlat").value);
     var textDepth = Number(document.getElementById("textDepth").value);
@@ -198,17 +117,14 @@ async function add3DWaveformFromData(values) {
       type,
       textX,
       textY,
-      textZ,
-      0,
-      0,
-      0,
-      1
+      textZ
     );
   }
 
   if (document.getElementById("addStand").checked) {
     waveFormMesh = await loadStand(waveFormMesh);
   }
+  document.getElementById("loadingScreen").style.display = "none";
   updateMesh(waveFormMesh);
   //
 }
@@ -268,6 +184,7 @@ async function loadStand(waveMesh) {
   );
   var mesh_bsp = new ThreeBSP(waveMesh);
   var cylinder_bsp = new ThreeBSP(cylinder);
+
   if (radiosCylinderType == "subtract") {
     var subtract_bsp = mesh_bsp.subtract(cylinder_bsp);
   } else {
@@ -278,7 +195,7 @@ async function loadStand(waveMesh) {
   return result;
 }
 
-async function addCircle3DWaveForm(values, step, color, heightScale, offset) {
+async function addCircle3DWaveForm(values, step, heightScale, offset) {
   var segmets = Number(document.getElementById("segmets").value);
 
   var points = [];
@@ -295,13 +212,13 @@ async function addCircle3DWaveForm(values, step, color, heightScale, offset) {
 
   var mesh = new THREE.Mesh(geometry, g_material);
 
-  //mesh.geometry.applyMatrix(new THREE.Matrix4().makeRotationY(180));
+  //Rotate
   mesh.geometry.applyMatrix(new THREE.Matrix4().makeRotationZ(4.71238898));
 
   return mesh;
 }
 
-async function addFlat3DWaveForm(values, step, color, heightScale, offset) {
+async function addFlat3DWaveForm(values, step, heightScale, offset) {
   var depth = Number(document.getElementById("flatDepth").value);
   var side;
   var radios = document.getElementsByName("side");
@@ -369,20 +286,7 @@ function loadFont(url) {
   });
 }
 
-async function addText(
-  mesh,
-  textLocal,
-  depth,
-  textSize,
-  type,
-  x,
-  y,
-  z,
-  rx,
-  ry,
-  rz,
-  s
-) {
+async function addText(mesh, textLocal, depth, textSize, type, x, y, z) {
   var font;
   if (document.getElementById("addFontFromFile").checked) {
     font = new THREE.FontLoader().parse(JSON.parse(g_font));
@@ -440,12 +344,16 @@ function rotateObject(mesh, degreeX = 0, degreeY = 0, degreeZ = 0) {
 }
 
 //EXPORT FUNCTIONS
+var link = document.createElement("a");
+link.style.display = "none";
+document.body.appendChild(link);
+
 function saveArrayBuffer(buffer, filename) {
   save(new Blob([buffer], { type: "application/octet-stream" }), filename);
 }
 function exportBinary() {
   var result = exporter.parse(currentWaveFormMesh, { binary: true });
-  saveArrayBuffer(result, "box.stl");
+  saveArrayBuffer(result, "waveForm3D.stl");
 }
 
 function save(blob, filename) {
@@ -463,7 +371,7 @@ const remaining = svg.querySelector("#remaining");
 const width = svg.getAttribute("width");
 const height = svg.getAttribute("height");
 svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-const smoothing = 4;
+var smoothing = 4;
 var currentWaveFormData = null;
 var currentAudioBuffer = null;
 var startAudioTime;
@@ -474,18 +382,39 @@ var endAudioTimeTemp;
 
 var audioDuration;
 
+var smoothingInput = document.getElementById("smoothing");
+smoothingInput.addEventListener("change", function() {
+  smoothing = Number(smoothingInput.value);
+
+  currentWaveFormData = getWaveformData(currentAudioBuffer, width / smoothing);
+  svg
+    .querySelector("path")
+    .setAttribute("d", getSVGPath(currentWaveFormData, height, smoothing));
+});
+
 svg.addEventListener("click", e => {
   const position = e.offsetX / svg.getBoundingClientRect().width;
   audio.currentTime = position * audio.duration;
 });
 
-document.getElementById("playPauseAudio").addEventListener("click", function() {
-  audio.currentTime = startAudioTime;
-  audio.play();
+var startPauseButton = document.getElementById("playPauseAudio");
+startPauseButton.addEventListener("click", function() {
+  console.log(audio.paused);
+  if (audio.paused) {
+    startPauseButton.style.backgroundColor = "yellow";
+    audio.play();
+  } else {
+    startPauseButton.style.backgroundColor = "green";
+    audio.pause();
+  }
+});
+
+audio.addEventListener("ended", function() {
+  startPauseButton.style.backgroundColor = "green";
 });
 
 //audio from file
-document.querySelector("input").addEventListener("change", e => {
+document.querySelector("#inputSoundFile").addEventListener("change", e => {
   const file = e.target.files[0];
   proccesBlob(file);
 });
@@ -507,7 +436,7 @@ if (navigator.mediaDevices.getUserMedia) {
       mediaRecorder.start();
       console.log(mediaRecorder.state);
       console.log("recorder started");
-      record.style.background = "red";
+      stop.style.background = "red";
 
       stop.disabled = false;
       record.disabled = true;
@@ -517,8 +446,8 @@ if (navigator.mediaDevices.getUserMedia) {
       mediaRecorder.stop();
       console.log(mediaRecorder.state);
       console.log("recorder stopped");
-      record.style.background = "";
-      record.style.color = "";
+      stop.style.background = "";
+      stop.style.color = "";
       // mediaRecorder.requestData();
 
       stop.disabled = true;
@@ -550,11 +479,16 @@ const avg = values =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
 const max = values => values.reduce((max, value) => Math.max(max, value), 0);
 
-function getWaveformData(audioBuffer, dataPoints) {
+function getWaveformData(
+  audioBuffer,
+  dataPoints,
+  normalizeLeftCutPosition = 0,
+  normalizeRightCutPosition = 1
+) {
   var tempLeftAudioCutIndex =
-    audioBuffer.getChannelData(0).length * normalizedLeftCutterPosition;
+    audioBuffer.getChannelData(0).length * normalizeLeftCutPosition;
   var tempRightAudioCutIndex =
-    audioBuffer.getChannelData(0).length * normalizedRightCutterPosition;
+    audioBuffer.getChannelData(0).length * normalizeRightCutPosition;
 
   var leftChannel = audioBuffer
     .getChannelData(0)
@@ -593,32 +527,84 @@ function getSVGPath(waveformData) {
   return path;
 }
 function attachToAudio(file) {
-  audio.setAttribute("autoplay", true);
   audio.src = URL.createObjectURL(file);
+  // DO I want autoplay?
+  // audio.setAttribute("autoplay", true);
 
+  remaining.setAttribute("width", width);
   updateAudioPosition();
 }
-audio.addEventListener("loadeddata", function() {
+
+var startTimeSpan = document.getElementById("startTimeSpan");
+var endTimeSpan = document.getElementById("endTimeSpan");
+
+audio.addEventListener("durationchange", function() {
   startAudioTime = 0;
   startAudioTimeTemp = 0;
   endAudioTime = audio.duration;
   endAudioTimeTemp = audio.duration;
   audioDuration = audio.duration;
+  endTimeSpan.innerText = formatTime(audio.duration);
+
+  //Chrome bug workaround
+  if (audio.duration === Infinity) {
+    audio.currentTime = 1e101;
+    audio.ontimeupdate = function() {
+      this.ontimeupdate = () => {
+        return;
+      };
+      //console.log(" after workaround: " + audio.duration);
+      audio.currentTime = 0.0001;
+      startAudioTime = 0;
+      startAudioTimeTemp = 0;
+      endAudioTime = audio.duration;
+      endAudioTimeTemp = audio.duration;
+      audioDuration = audio.duration;
+      endTimeSpan.innerText = formatTime(audio.duration);
+    };
+  }
 });
+
+var currentTimeSpan = document.getElementById("currentTimeSpan");
 function updateAudioPosition() {
   const physicalPosition =
     ((audio.currentTime - startAudioTimeTemp) / audioDuration) * width;
+
   if (physicalPosition) {
     progress.setAttribute("width", physicalPosition);
     remaining.setAttribute("x", physicalPosition);
     remaining.setAttribute("width", width - physicalPosition);
   }
+
+  var currentTimePosition =
+    ((audio.currentTime - startAudioTimeTemp) / audioDuration) *
+    (audioCuttingWindow.offsetWidth - currentTimeSpan.offsetWidth);
+  if (
+    currentTimePosition >
+    audioCuttingWindow.offsetWidth - currentTimeSpan.offsetWidth
+  ) {
+    currentTimePosition =
+      audioCuttingWindow.offsetWidth - currentTimeSpan.offsetWidth;
+  }
+  currentTimeSpan.style.marginLeft = currentTimePosition + "px";
+
+  currentTimeSpan.innerText = formatTime(audio.currentTime);
+  // console.log(audioCuttingWindow.offsetWidth);
   //loop audio playing between cutters
   if (audio.currentTime > endAudioTime) {
     audio.currentTime = startAudioTime;
   }
   requestAnimationFrame(updateAudioPosition);
 }
+
+function formatTime(seconds) {
+  minutes = Math.floor(seconds / 60);
+  minutes = minutes >= 10 ? minutes : "0" + minutes;
+  seconds = Math.floor(seconds % 60);
+  seconds = seconds >= 10 ? seconds : "0" + seconds;
+  return minutes + ":" + seconds;
+}
+
 function processTrack(buffer) {
   const source = audioContext.createBufferSource();
   return audioContext
@@ -648,139 +634,139 @@ function proccesBlob(blob) {
 var normalizedLeftCutterPosition = 0;
 var normalizedRightCutterPosition = 1;
 
-initCutting();
-function initCutting() {
-  var leftAudioCutter = document.getElementById("leftAudioCutter");
-  var rightAudioCutter = document.getElementById("rightAudioCutter");
-  var audioCuttingWindow = document.getElementById("audioCuttingWindow");
-  var cutWindow = document.getElementById("cutWindow");
-  cutWindow.style.width = audioCuttingWindow.offsetWidth - 39 + "px"; //TODO: fix small gap
-  var cutWindowStartWidth = audioCuttingWindow.offsetWidth - 40;
-  console.log(audioCuttingWindow.offsetWidth);
+var leftAudioCutter = document.getElementById("leftAudioCutter");
+var rightAudioCutter = document.getElementById("rightAudioCutter");
+var audioCuttingWindow = document.getElementById("audioCuttingWindow");
+var cutWindow = document.getElementById("cutWindow");
+cutWindow.style.width = audioCuttingWindow.offsetWidth - 36 + "px";
+var cutWindowStartWidth = audioCuttingWindow.offsetWidth - 40;
+console.log(audioCuttingWindow.offsetWidth);
 
-  var SVG2DWaveform = document.getElementById("SVG2DWaveform");
-  console.log(SVG2DWaveform.style.width);
+var SVG2DWaveform = document.getElementById("SVG2DWaveform");
+console.log(SVG2DWaveform.style.width);
 
-  //recalculate values of audio buffer
-  var cutAudioButton = document.getElementById("cutAudioButton");
-  cutAudioButton.addEventListener("click", function() {
-    startAudioTimeTemp =
-      startAudioTimeTemp + audioDuration * normalizedLeftCutterPosition;
-    endAudioTimeTemp =
-      endAudioTimeTemp -
-      (audioDuration - audioDuration * normalizedRightCutterPosition);
-    audioDuration = endAudioTimeTemp - startAudioTimeTemp;
+//recalculate values of audio buffer
+var cutAudioButton = document.getElementById("cutAudioButton");
+cutAudioButton.addEventListener("click", function() {
+  startAudioTimeTemp =
+    startAudioTimeTemp + audioDuration * normalizedLeftCutterPosition;
+  endAudioTimeTemp =
+    endAudioTimeTemp -
+    (audioDuration - audioDuration * normalizedRightCutterPosition);
+  audioDuration = endAudioTimeTemp - startAudioTimeTemp;
 
-    currentWaveFormData = getWaveformData(
-      currentAudioBuffer,
-      width / smoothing
-    );
-    svg
-      .querySelector("path")
-      .setAttribute("d", getSVGPath(currentWaveFormData, height, smoothing));
-  });
+  currentWaveFormData = getWaveformData(
+    currentAudioBuffer,
+    width / smoothing,
+    normalizedLeftCutterPosition,
+    normalizedRightCutterPosition
+  );
+  svg
+    .querySelector("path")
+    .setAttribute("d", getSVGPath(currentWaveFormData, height, smoothing));
+});
 
-  var vizualizeCutWindow = document.getElementById("vizualizeCutWindow");
-  vizualizeCutWindow.addEventListener("click", function() {
-    add3DWaveformFromData(
-      currentWaveFormData.slice(
-        currentWaveFormData.length * normalizedLeftCutterPosition,
-        currentWaveFormData.length * normalizedRightCutterPosition
-      )
-    );
-  });
+var vizualizeCutWindow = document.getElementById("vizualizeCutWindow");
+vizualizeCutWindow.addEventListener("click", function() {
+  add3DWaveformFromData(
+    currentWaveFormData.slice(
+      currentWaveFormData.length * normalizedLeftCutterPosition,
+      currentWaveFormData.length * normalizedRightCutterPosition
+    )
+  );
+});
 
-  dragElement(leftAudioCutter);
-  dragElement(rightAudioCutter);
+dragElement(leftAudioCutter);
+dragElement(rightAudioCutter);
 
-  function dragElement(elmnt) {
-    var pos1 = 0,
-      pos2 = 0,
-      pos3 = 0,
-      pos4 = 0;
+function dragElement(elmnt) {
+  var pos1 = 0,
+    pos2 = 0,
+    pos3 = 0,
+    pos4 = 0;
 
-    elmnt.onmousedown = dragMouseDown;
+  elmnt.onmousedown = dragMouseDown;
 
-    function dragMouseDown(e) {
-      e = e || window.event;
-      e.preventDefault();
-      // get the mouse cursor position at startup:
-      pos3 = e.clientX;
-      pos4 = e.clientY;
-      document.onmouseup = closeDragElement;
-      // call a function whenever the cursor moves:
-      document.onmousemove = elementDrag;
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    // set the element's new position:
+    //elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    if (elmnt.offsetLeft - pos1 < 0) {
+      elmnt.style.left = "0px";
+    } else {
+      elmnt.style.left = elmnt.offsetLeft - pos1 + "px";
     }
 
-    function elementDrag(e) {
-      e = e || window.event;
-      e.preventDefault();
-      // calculate the new cursor position:
-      pos1 = pos3 - e.clientX;
-      pos2 = pos4 - e.clientY;
-      pos3 = e.clientX;
-      pos4 = e.clientY;
-      // set the element's new position:
-      //elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-      if (elmnt.offsetLeft - pos1 < 0) {
-        elmnt.style.left = "0px";
-      } else {
-        elmnt.style.left = elmnt.offsetLeft - pos1 + "px";
+    if (elmnt.id == "leftAudioCutter") {
+      if (elmnt.offsetLeft + 18 >= rightAudioCutter.offsetLeft) {
+        //preventing crossing
+        elmnt.style.left = rightAudioCutter.offsetLeft - 18 + "px";
       }
-
-      if (elmnt.id == "leftAudioCutter") {
-        if (elmnt.offsetLeft + 22 >= rightAudioCutter.offsetLeft) {
-          //preventing crossing
-          elmnt.style.left = rightAudioCutter.offsetLeft - 22 + "px";
-        }
-        //resize cut window to fit between cutters
-        cutWindow.style.left = elmnt.offsetLeft + 22 + "px";
-        cutWindow.style.width =
-          cutWindowStartWidth -
-          elmnt.offsetLeft -
-          (cutWindowStartWidth - rightAudioCutter.offsetLeft) -
-          18 +
-          "px";
-        normalizedLeftCutterPosition =
-          leftAudioCutter.offsetLeft / audioCuttingWindow.offsetWidth;
-        startAudioTime =
-          startAudioTimeTemp + audioDuration * normalizedLeftCutterPosition;
-      }
-
-      if (elmnt.id == "rightAudioCutter") {
-        if (elmnt.offsetLeft - 22 <= leftAudioCutter.offsetLeft) {
-          elmnt.style.left = leftAudioCutter.offsetLeft + 22 + "px";
-        }
-
-        if (elmnt.offsetLeft >= audioCuttingWindow.offsetWidth - 22) {
-          // preventing right cutter leaving screen
-          elmnt.style.left = audioCuttingWindow.offsetWidth - 22 + "px";
-        }
-        //resize cut window to fit between cutters
-        cutWindow.style.width =
-          cutWindowStartWidth -
-          (cutWindowStartWidth - elmnt.offsetLeft) -
-          leftAudioCutter.offsetLeft -
-          18 +
-          "px";
-        normalizedRightCutterPosition =
-          (rightAudioCutter.offsetLeft + 22) / audioCuttingWindow.offsetWidth;
-        endAudioTime =
-          endAudioTimeTemp -
-          (audioDuration - audioDuration * normalizedRightCutterPosition);
-      }
-
-      console.log(endAudioTime);
-      console.log(audio.currentTime);
-      console.log("Left: " + normalizedLeftCutterPosition);
-      console.log("Right: " + normalizedRightCutterPosition);
+      //resize cut window to fit between cutters
+      cutWindow.style.left = elmnt.offsetLeft + 18 + "px";
+      cutWindow.style.width =
+        cutWindowStartWidth -
+        elmnt.offsetLeft -
+        (cutWindowStartWidth - rightAudioCutter.offsetLeft) -
+        18 +
+        "px";
+      normalizedLeftCutterPosition =
+        leftAudioCutter.offsetLeft / audioCuttingWindow.offsetWidth;
+      startAudioTime =
+        startAudioTimeTemp + audioDuration * normalizedLeftCutterPosition;
     }
 
-    function closeDragElement() {
-      /* stop moving when mouse button is released:*/
-      document.onmouseup = null;
-      document.onmousemove = null;
+    if (elmnt.id == "rightAudioCutter") {
+      if (elmnt.offsetLeft - 18 <= leftAudioCutter.offsetLeft) {
+        elmnt.style.left = leftAudioCutter.offsetLeft + 18 + "px";
+      }
+
+      if (elmnt.offsetLeft >= audioCuttingWindow.offsetWidth - 18) {
+        // preventing right cutter leaving screen
+        elmnt.style.left = audioCuttingWindow.offsetWidth - 18 + "px";
+      }
+      //resize cut window to fit between cutters
+      cutWindow.style.width =
+        cutWindowStartWidth -
+        (cutWindowStartWidth - elmnt.offsetLeft) -
+        leftAudioCutter.offsetLeft -
+        18 +
+        "px";
+      normalizedRightCutterPosition =
+        (rightAudioCutter.offsetLeft - 18) /
+        (audioCuttingWindow.offsetWidth - 36);
+      endAudioTime =
+        endAudioTimeTemp -
+        (audioDuration - audioDuration * normalizedRightCutterPosition);
     }
+
+    console.log(endAudioTime);
+    console.log(audio.currentTime);
+    console.log("Left: " + normalizedLeftCutterPosition);
+    console.log("Right: " + normalizedRightCutterPosition);
+  }
+
+  function closeDragElement() {
+    /* stop moving when mouse button is released:*/
+    document.onmouseup = null;
+    document.onmousemove = null;
   }
 }
 
@@ -810,9 +796,6 @@ var picker = new Picker({
   color: "#ffffff"
 });
 
-/*
-    You can do what you want with the chosen color using two callbacks: onChange and onDone.
-*/
 picker.onChange = function(color) {
   colorWaveForm.style.background = color.rgbaString;
 };

@@ -13,13 +13,25 @@
     <link rel="stylesheet" type="text/css" href="css/mystyle.css" />
   </head>
   <body>
+    <div id="loadingScreen">
+      <img
+        src="https://i.pinimg.com/originals/aa/51/bd/aa51bd72926e11f7006369f6d211a668.gif"
+        class="center"
+      />
+    </div>
     <div class="container-fluid">
       <div class="row">
         <div class="col">
           <div id="audio2DControls">
-            <input type="file" /><br />
+            Smoothing: <input type="number" id="smoothing" value="8" /><br />
+
+            <input id="inputSoundFile" type="file" /><br />
             <button id="record">Record</button>
             <button id="stop">Stop</button>
+            <div>
+              <span id="startTimeSpan">00:00</span>
+              <span id="endTimeSpan">00:00</span>
+            </div>
             <div id="audioCuttingWindow">
               <div id="leftAudioCutter"></div>
               <div id="rightAudioCutter"></div>
@@ -61,9 +73,15 @@
                 />
               </svg>
             </div>
-
+            <div>
+              <span id="currentTimeSpan">
+                00:00
+              </span>
+            </div>
             <button id="cutAudioButton">Cut audio</button>
-            <button id="playPauseAudio">Play/Pause</button>
+            <button style="background-color: green" id="playPauseAudio">
+              Play/Pause
+            </button>
           </div>
         </div>
         <br />
@@ -207,18 +225,19 @@
     </div>
 
     <div class="post-wrapper">
-      <div class="row">
-        <div class="col post">
-          test
+      <div class="row post-row">
+        <div class="col">
+          <img src="assets/flat.jpg" />
+        </div>
+        <div class="col">
+          Make cool gifts!
         </div>
       </div>
-      <div class="row">
+      <div class="row post-row">
         <div class="col">
-          test1
+          <img src="assets/circle.jpg" />
         </div>
-        <div class="col">
-          test2
-        </div>
+        <div class="col"></div>
       </div>
     </div>
 

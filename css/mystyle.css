@@ -34,8 +34,8 @@ body {
 #audioCuttingWindow {
   background: rgb(112, 112, 112);
   position: relative;
-  padding-left: 22px;
-  padding-right: 22px;
+  padding-left: 18px;
+  padding-right: 18px;
   border-radius: 10px;
 }
 
@@ -45,6 +45,14 @@ body {
   height: 100%;
   width: 100px;
   left: 18px;
+  pointer-events: none;
+}
+
+#endTimeSpan {
+  float: right;
+}
+
+#currentTimeSpan {
 }
 
 #mydivheader {
@@ -61,6 +69,24 @@ body {
 }
 
 #audio3DControls {
+}
+
+#loadingScreen {
+  display: none;
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  background: rgba(58, 58, 48, 0.8);
+  z-index: 1500;
+}
+
+.center {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
 }
 
 .block {
@@ -166,33 +192,22 @@ button {
 }
 
 .post-wrapper {
-  width: 75vw;
+  width: 85vw;
   margin: auto;
 }
-.post {
-  display: flex;
-  background: #3a3a3a;
-  margin: 1em;
+.post-row {
+  margin-bottom: 8px;
+  padding: 8px;
+  background-color: #575757;
 }
-.post:nth-child(2n) {
-  flex-direction: row-reverse;
-  text-align: right;
+
+.post-col {
 }
-.post .image-wrapper {
-  position: relative;
-}
-.post .image-wrapper img {
-  display: block;
-  max-height: unset;
+
+.post-wrapper img {
   height: 100%;
   width: 100%;
-  object-fit: cover;
-}
-.post .content {
-  box-sizing: border-box;
-  min-width: 50%;
-  max-width: 50%;
-  padding: 2em 3em;
+  min-width: 340px;
 }
 
 canvas {
@@ -200,4 +215,8 @@ canvas {
   background-color: black;
   width: 100%;
   height: auto;
+}
+
+#colorWaveForm {
+  background: red;
 }

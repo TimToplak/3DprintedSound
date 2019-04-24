@@ -1,4 +1,4 @@
-importScripts("../js/lib/three.js");
+importScripts("../js/lib/ThreeCSG.js");
 /*
 var i = 0;
 
@@ -13,16 +13,6 @@ timedCount();
 */
 onmessage = async function(e) {
   console.log(e.data);
-  var mesh = await addFlat3DWaveForm(
-    e.data.values,
-    e.data.step,
-    e.data.material,
-    e.data.heightScale,
-    e.data.offset,
-    e.data.depth,
-    e.data.side
-  );
-  console.log(mesh);
 
   // addCircle3DWaveForm2(e.data.values,e.segmets,e.step,e.material,e.heightScale)
 };
