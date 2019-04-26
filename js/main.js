@@ -81,7 +81,7 @@ async function add3DWaveformFromData(values) {
   });
 
   var waveFormType = document
-    .getElementsByClassName("tab-active")[0]
+    .getElementsByClassName("activeTab")[0]
     .getAttribute("value");
 
   var waveFormMesh;
@@ -126,37 +126,9 @@ async function add3DWaveformFromData(values) {
   }
   document.getElementById("loadingScreen").style.display = "none";
   updateMesh(waveFormMesh);
-  //
 }
 
 async function loadStand(waveMesh) {
-  /*
-  var loader = new THREE.STLLoader();
-  loader.load("../stand.stl", function(geometry) {
-    var mesh = new THREE.Mesh(
-      geometry,
-      new THREE.MeshPhongMaterial({
-        color: 0xff0000,
-        shininess: 66,
-        opacity: 0.3,
-        transparent: true,
-        side: THREE.DoubleSide
-      })
-    );
-
-   
-
-    var group = new THREE.Group();
-    group.add(cylinder);
-    group.add(mesh);
-
-    mesh.add(cylinder);
-    
-
-    scene.add(group);
-  });
-  */
-
   var cylinderX = Number(document.getElementById("cylinderX").value);
   var cylinderY = Number(document.getElementById("cylinderY").value);
   var cylinderZ = Number(document.getElementById("cylinderZ").value);
@@ -197,7 +169,6 @@ async function loadStand(waveMesh) {
 
 async function addCircle3DWaveForm(values, step, heightScale, offset) {
   var segmets = Number(document.getElementById("segmets").value);
-
   var points = [];
 
   var stepValue = step;
@@ -209,7 +180,6 @@ async function addCircle3DWaveForm(values, step, heightScale, offset) {
   points.push(new THREE.Vector2(0, stepValue + step));
 
   var geometry = new THREE.LatheGeometry(points, segmets);
-
   var mesh = new THREE.Mesh(geometry, g_material);
 
   //Rotate
@@ -261,23 +231,11 @@ async function addFlat3DWaveForm(values, step, heightScale, offset) {
   var geometry = new THREE.ExtrudeBufferGeometry(pointsShape, extrudeSettings);
 
   //work around, so that THREEBSP works
-  var test = new THREE.Geometry().fromBufferGeometry(geometry);
+  var normal_geometry = new THREE.Geometry().fromBufferGeometry(geometry);
 
-  var mesh = new THREE.Mesh(test, g_material);
+  var mesh = new THREE.Mesh(normal_geometry, g_material);
 
   return mesh;
-  /*
-  //HELPERS
-  var edges = new THREE.EdgesGeometry(mesh.geometry);
-  var line = new THREE.LineSegments(edges);
-  line.material.depthTest = false;
-  line.material.opacity = 0.25;
-  line.material.transparent = true;
-  scene.add(line);
-  scene.add(new THREE.BoxHelper(line));
-  //scene.add(new THREE.BoxHelper(group));
-  //scene.add(new THREE.BoxHelper(scene));
-  */
 }
 
 function loadFont(url) {
@@ -553,7 +511,6 @@ audio.addEventListener("durationchange", function() {
       this.ontimeupdate = () => {
         return;
       };
-      //console.log(" after workaround: " + audio.duration);
       audio.currentTime = 0.0001;
       startAudioTime = 0;
       startAudioTimeTemp = 0;
@@ -589,7 +546,6 @@ function updateAudioPosition() {
   currentTimeSpan.style.marginLeft = currentTimePosition + "px";
 
   currentTimeSpan.innerText = formatTime(audio.currentTime);
-  // console.log(audioCuttingWindow.offsetWidth);
   //loop audio playing between cutters
   if (audio.currentTime > endAudioTime) {
     audio.currentTime = startAudioTime;
@@ -770,23 +726,6 @@ function dragElement(elmnt) {
   }
 }
 
-//TABS
-// Show the first tab by default
-$(".tabs-stage div").hide();
-$(".tabs-stage div:first").show();
-$(".tabs-nav li:first").addClass("tab-active");
-
-// Change tab class and display content
-$(".tabs-nav a").on("click", function(event) {
-  event.preventDefault();
-  $(".tabs-nav li").removeClass("tab-active");
-  $(this)
-    .parent()
-    .addClass("tab-active");
-  $(".tabs-stage div").hide();
-  $($(this).attr("href")).show();
-});
-
 //COLOR PICKER
 var g_material;
 var colorWaveForm = document.querySelector("#colorWaveForm");
@@ -799,3 +738,44 @@ var picker = new Picker({
 picker.onChange = function(color) {
   colorWaveForm.style.background = color.rgbaString;
 };
+
+//TABS
+var tabs = document.querySelectorAll("#tabstrip > span"),
+  panels = document.querySelectorAll("#tabstrip > div"),
+  length = tabs.length,
+  currentTab,
+  currentPanel;
+
+function getToggler(newTab, newPanel) {
+  return function() {
+    currentTab.className = "tab inactiveTab";
+    currentPanel.className = "inactivePanel";
+    newTab.className = "tab activeTab";
+    newPanel.className = "activePanel";
+    currentTab = newTab;
+    currentPanel = newPanel;
+  };
+}
+
+if (length !== panels.length)
+  throw new Error(
+    "Number of tabs (" +
+      length +
+      ") and number of content panels (" +
+      panels.length +
+      ") are not equal"
+  );
+
+for (var i = 0; i < length; i++) {
+  var tab = tabs[i];
+  var panel = panels[i];
+
+  tab.className = "tab inactiveTab";
+  tab.addEventListener("click", getToggler(tab, panel), false);
+  panel.className = "inactivePanel";
+}
+
+currentTab = tabs[0];
+currentPanel = panels[0];
+currentTab.className = "tab activeTab";
+currentPanel.className = "activePanel";

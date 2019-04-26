@@ -1,6 +1,6 @@
 body {
   background-color: black;
-  background-image: url("http://api.thumbr.it/whitenoise-1920x1080.png?background=1a1a1aff&noise=626262&density=82&opacity=15");
+  background-image: url("../assets/whitenoise-1920x1080.png");
   font-size: 0.85em !important;
   font-family: Arial, Helvetica, sans-serif;
   color: white;
@@ -35,7 +35,7 @@ body {
   background: rgb(112, 112, 112);
   position: relative;
   padding-left: 18px;
-  padding-right: 18px;
+  padding-right: 14px;
   border-radius: 10px;
 }
 
@@ -64,8 +64,9 @@ body {
 }
 
 #audio2DControls {
-  margin-left: 5%;
-  margin-right: 5%;
+  margin-left: 3%;
+  margin-right: 3%;
+  padding: 1%;
 }
 
 #audio3DControls {
@@ -93,61 +94,6 @@ body {
   /*display: inline-block;
   vertical-align: top;*/
   border: 1px solid rgb(250, 184, 1);
-}
-
-ul {
-  list-style-type: none;
-}
-
-ul,
-li {
-  margin: 0;
-  padding: 0;
-}
-
-.tabs {
-  width: 100%;
-}
-.tabs-nav li {
-  float: left;
-  width: 50%;
-}
-.tabs-nav li:first-child a {
-  border-right: 1px solid rgb(250, 184, 1);
-}
-/*
-.tabs-nav li:last-child a {
-  color: #ff7b29;
-}
-*/
-a {
-  background: #3a3a3a;
-  border-top: 1px solid rgb(250, 184, 1);
-  border-bottom: 1px solid rgb(250, 184, 1);
-  color: white;
-  display: block;
-  font-weight: 600;
-  padding: 10px 0;
-  text-align: center;
-  text-decoration: none;
-}
-a:hover {
-  color: rgb(250, 184, 1);
-}
-.tab-active a {
-  background: #575757;
-  border-bottom-color: transparent;
-  color: rgb(250, 184, 1);
-  cursor: default;
-}
-.tabs-stage {
-  border-top: 1px solid rgb(250, 184, 1);
-  border-bottom: 1px solid rgb(250, 184, 1);
-  border-top: 0;
-  clear: both;
-  padding: 12px 12px;
-  position: relative;
-  top: -1px;
 }
 
 button:hover {
@@ -198,7 +144,7 @@ button {
 .post-row {
   margin-bottom: 8px;
   padding: 8px;
-  background-color: #575757;
+  background-color: #3a3a3a;
 }
 
 .post-col {
@@ -219,4 +165,74 @@ canvas {
 
 #colorWaveForm {
   background: red;
+}
+
+footer {
+  padding: 5px;
+  background: #3a3a3a;
+}
+
+footer img {
+  margin-left: 10px;
+  width: 32px;
+  height: 32px;
+}
+
+footer a {
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: none;
+}
+
+#tabstrip {
+  padding: 0em;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  width: 100%;
+  border-bottom: 1px solid rgb(250, 184, 1);
+}
+
+.tab {
+  cursor: pointer;
+  float: left;
+
+  border-top: 1px solid rgb(250, 184, 1);
+  min-width: 3em;
+  overflow: hidden;
+  padding: 0.625em;
+  white-space: nowrap;
+
+  width: 50%;
+}
+
+.tab:first-child {
+  border-right: 1px solid rgb(250, 184, 1);
+}
+
+.activeTab {
+  background-color: #575757;
+}
+
+.inactiveTab {
+  background-color: #3a3a3a;
+  border-bottom: 1px solid rgb(250, 184, 1);
+}
+
+.activePanel {
+  color: #ffffff;
+
+  clear: both;
+  display: block;
+  padding: 1em;
+}
+
+.inactivePanel {
+  display: none;
+}
+
+#audio3DControls button {
+  width: 100%;
+  margin: 0;
 }
