@@ -91,7 +91,6 @@ async function add3DWaveformFromData(values) {
     waveFormMesh = await addCircle3DWaveForm(values, step, heightScale, offset);
   }
 
-  console.log(waveFormMesh);
   document.getElementById("loadingScreen").style.display = "block";
   if (document.getElementById("addTextFlat").checked) {
     var text = String(document.getElementById("textFlat").value);
@@ -271,7 +270,7 @@ async function addText(mesh, textLocal, depth, textSize, type, x, y, z) {
     var subtract_bsp = mesh_bsp.union(text_bsp);
   }
   result = subtract_bsp.toMesh(g_material);
-  result.geometry.computeVertexNormals();
+  //result.geometry.computeVertexNormals();
 
   return result;
 }
@@ -601,7 +600,9 @@ console.log(audioCuttingWindow.offsetWidth);
 var SVG2DWaveform = document.getElementById("SVG2DWaveform");
 console.log(SVG2DWaveform.style.width);
 
-//recalculate values of audio buffer
+/*
+//IN DEVELOPMENT
+//recalculate values of audio buffer 
 var cutAudioButton = document.getElementById("cutAudioButton");
 cutAudioButton.addEventListener("click", function() {
   startAudioTimeTemp =
@@ -621,7 +622,7 @@ cutAudioButton.addEventListener("click", function() {
     .querySelector("path")
     .setAttribute("d", getSVGPath(currentWaveFormData, height, smoothing));
 });
-
+*/
 var vizualizeCutWindow = document.getElementById("vizualizeCutWindow");
 vizualizeCutWindow.addEventListener("click", function() {
   add3DWaveformFromData(
@@ -779,3 +780,180 @@ currentTab = tabs[0];
 currentPanel = panels[0];
 currentTab.className = "tab activeTab";
 currentPanel.className = "activePanel";
+
+//DOWNLOAD .wav
+function audioBufferToWav(buffer, opt) {
+  opt = opt || {};
+
+  var numChannels = buffer.numberOfChannels;
+  var sampleRate = buffer.sampleRate;
+  var format = opt.float32 ? 3 : 1;
+  var bitDepth = format === 3 ? 32 : 16;
+
+  var result;
+  if (numChannels === 2) {
+    result = interleave(buffer.getChannelData(0), buffer.getChannelData(1));
+  } else {
+    result = buffer.getChannelData(0);
+  }
+
+  return encodeWAV(result, format, sampleRate, numChannels, bitDepth);
+}
+
+function encodeWAV(samples, format, sampleRate, numChannels, bitDepth) {
+  var bytesPerSample = bitDepth / 8;
+  var blockAlign = numChannels * bytesPerSample;
+
+  var buffer = new ArrayBuffer(44 + samples.length * bytesPerSample);
+  var view = new DataView(buffer);
+
+  /* RIFF identifier */
+  writeString(view, 0, "RIFF");
+  /* RIFF chunk length */
+  view.setUint32(4, 36 + samples.length * bytesPerSample, true);
+  /* RIFF type */
+  writeString(view, 8, "WAVE");
+  /* format chunk identifier */
+  writeString(view, 12, "fmt ");
+  /* format chunk length */
+  view.setUint32(16, 16, true);
+  /* sample format (raw) */
+  view.setUint16(20, format, true);
+  /* channel count */
+  view.setUint16(22, numChannels, true);
+  /* sample rate */
+  view.setUint32(24, sampleRate, true);
+  /* byte rate (sample rate * block align) */
+  view.setUint32(28, sampleRate * blockAlign, true);
+  /* block align (channel count * bytes per sample) */
+  view.setUint16(32, blockAlign, true);
+  /* bits per sample */
+  view.setUint16(34, bitDepth, true);
+  /* data chunk identifier */
+  writeString(view, 36, "data");
+  /* data chunk length */
+  view.setUint32(40, samples.length * bytesPerSample, true);
+  if (format === 1) {
+    // Raw PCM
+    floatTo16BitPCM(view, 44, samples);
+  } else {
+    writeFloat32(view, 44, samples);
+  }
+
+  return buffer;
+}
+
+function interleave(inputL, inputR) {
+  var length = inputL.length + inputR.length;
+  var result = new Float32Array(length);
+
+  var index = 0;
+  var inputIndex = 0;
+
+  while (index < length) {
+    result[index++] = inputL[inputIndex];
+    result[index++] = inputR[inputIndex];
+    inputIndex++;
+  }
+  return result;
+}
+
+function writeFloat32(output, offset, input) {
+  for (var i = 0; i < input.length; i++, offset += 4) {
+    output.setFloat32(offset, input[i], true);
+  }
+}
+
+function floatTo16BitPCM(output, offset, input) {
+  for (var i = 0; i < input.length; i++, offset += 2) {
+    var s = Math.max(-1, Math.min(1, input[i]));
+    output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+  }
+}
+
+function writeString(view, offset, string) {
+  for (var i = 0; i < string.length; i++) {
+    view.setUint8(offset + i, string.charCodeAt(i));
+  }
+}
+
+var anchor = document.createElement("a");
+document.body.appendChild(anchor);
+anchor.style = "display: none";
+var downloadWavButton = document.getElementById("downloadWavButton");
+downloadWavButton.addEventListener("click", function() {
+  AudioBufferSlice(
+    currentAudioBuffer,
+    normalizedLeftCutterPosition * audio.duration,
+    normalizedRightCutterPosition * audio.duration,
+    function(error, slicedAudioBuffer) {
+      var wav = audioBufferToWav(slicedAudioBuffer);
+      var blob = new window.Blob([new DataView(wav)], {
+        type: "audio/wav"
+      });
+
+      var url = window.URL.createObjectURL(blob);
+      anchor.href = url;
+      anchor.download = "audio.wav";
+      anchor.click();
+      window.URL.revokeObjectURL(url);
+    }
+  );
+});
+
+function AudioBufferSlice(buffer, begin, end, callback) {
+  if (!(this instanceof AudioBufferSlice)) {
+    return new AudioBufferSlice(buffer, begin, end, callback);
+  }
+
+  var error = null;
+
+  var duration = buffer.duration;
+  var channels = buffer.numberOfChannels;
+  var rate = buffer.sampleRate;
+
+  if (typeof end === "function") {
+    callback = end;
+    end = duration;
+  }
+
+  // milliseconds to seconds
+
+  if (begin < 0) {
+    error = new RangeError("begin time must be greater than 0");
+  }
+
+  if (end > duration) {
+    error = new RangeError(
+      "end time must be less than or equal to " + duration
+    );
+  }
+
+  if (typeof callback !== "function") {
+    error = new TypeError("callback must be a function");
+  }
+
+  var startOffset = rate * begin;
+  var endOffset = rate * end;
+  var frameCount = endOffset - startOffset;
+  var newArrayBuffer;
+
+  try {
+    newArrayBuffer = audioContext.createBuffer(
+      channels,
+      endOffset - startOffset,
+      rate
+    );
+    var anotherArray = new Float32Array(frameCount);
+    var offset = 0;
+
+    for (var channel = 0; channel < channels; channel++) {
+      buffer.copyFromChannel(anotherArray, channel, startOffset);
+      newArrayBuffer.copyToChannel(anotherArray, channel, offset);
+    }
+  } catch (e) {
+    error = e;
+  }
+
+  callback(error, newArrayBuffer);
+}

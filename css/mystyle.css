@@ -89,6 +89,20 @@ body {
   bottom: 0;
   margin: auto;
 }
+.overlay-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  background: #3a3a3a;
+  border: 1px solid rgb(250, 184, 1);
+
+  z-index: 1000;
+}
+.text-align-center {
+  text-align: center;
+}
 
 .block {
   /*display: inline-block;
@@ -140,11 +154,14 @@ button {
 .post-wrapper {
   width: 85vw;
   margin: auto;
+  margin-top: 5px;
 }
 .post-row {
-  margin-bottom: 8px;
   padding: 8px;
   background-color: #3a3a3a;
+  border-top: 1px solid rgb(250, 184, 1);
+  border-right: 1px solid rgb(250, 184, 1);
+  border-left: 1px solid rgb(250, 184, 1);
 }
 
 .post-col {
@@ -170,6 +187,7 @@ canvas {
 footer {
   padding: 5px;
   background: #3a3a3a;
+  border-top: 1px solid rgb(250, 184, 1);
 }
 
 footer img {
@@ -213,11 +231,20 @@ footer a:hover {
 
 .activeTab {
   background-color: #575757;
+  color: rgb(250, 184, 1);
 }
 
 .inactiveTab {
   background-color: #3a3a3a;
   border-bottom: 1px solid rgb(250, 184, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.inactiveTab:hover {
+  background-color: #3a3a3a;
+  border-bottom: 1px solid rgb(250, 184, 1);
+  background-color: #575757;
+  color: rgb(250, 184, 1);
 }
 
 .activePanel {
@@ -233,6 +260,32 @@ footer a:hover {
 }
 
 #audio3DControls button {
-  width: 100%;
-  margin: 0;
+  width: calc(100% - 10px);
+  margin: 5px;
+}
+
+input[type="number"] {
+  width: 60px;
+  color: white;
+  background: #575757;
+  border: 1px solid #3a3a3a;
+  text-align: center;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+input[type="text"] {
+  width: 50%;
+  color: white;
+  background: #575757;
+  border: 1px solid #3a3a3a;
+}
+
+input [type="file"] {
+  color: white;
+  background: #575757;
+  border: 1px solid #3a3a3a;
 }

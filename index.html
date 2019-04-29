@@ -3,28 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>3D sound</title>
+    <title>3D printed sound</title>
     <link rel="stylesheet" href="css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="css/mystyle.css" />
   </head>
   <body>
     <div id="loadingScreen">
-      <img
-        src="https://i.pinimg.com/originals/aa/51/bd/aa51bd72926e11f7006369f6d211a668.gif"
-        class="center"
-      />
+      <div class="overlay-box text-align-center">
+        <img src="assets/Eclipse-loading.gif" /><br />
+        <span class="">Loading...</span>
+      </div>
     </div>
+
     <div class="container-fluid">
       <div class="row">
         <div class="col">
           <div id="audio2DControls">
-            Smoothing: <input type="number" id="smoothing" value="4" /><br />
-
             Sound from file: <input id="inputSoundFile" type="file" /><br />
             Record sound from michrophone (allow browser to use a
             michrophone):<br />
+
             <button id="record">Record</button>
-            <button id="stop">Stop</button>
+            <button id="stop">Stop</button
+            ><b> We do NOT collect any of your recorded sounds.</b><br />
+            Smoothing: <input type="number" id="smoothing" value="4" /><br />
+
             <div>
               <span id="startTimeSpan">00:00</span>
               <span id="endTimeSpan">00:00</span>
@@ -78,7 +81,10 @@
             <button style="background-color: green" id="playPauseAudio">
               Play/Pause
             </button>
-            <button id="cutAudioButton">Cut audio</button>
+            <button id="downloadWavButton">
+              Download sound(.wav) between cutters
+            </button>
+            <!-- <button id="cutAudioButton">Cut audio</button>-->
           </div>
         </div>
         <br />
@@ -133,7 +139,7 @@
                 <input checked type="checkbox" id="addTextFlat" /> add text
 
                 <br />
-                <input type="text" id="textFlat" value="test" />
+                <input type="text" id="textFlat" value="text here" />
                 <br />
                 <input type="checkbox" id="addFontFromFile" /> font from file:
                 <input type="file" id="fontFile" />
@@ -212,7 +218,7 @@
 
                 <br />
               </div>
-              <button onclick="exportBinary()">export .svg</button>
+              <button onclick="exportBinary()">download .svg</button>
             </div>
           </div>
         </div>
@@ -290,11 +296,21 @@
         <div class="col">
           <h4>About</h4>
           <p>
-            Code is under MIT license, so feel free to use it.
+            Project is open source, code is under MIT license, so feel free to
+            use it how ever you like.
             <b>
-              Website run fully on client. We do NOT collect any of your
-              recorded sound.</b
+              Website run fully on client, we do NOT collect any of your
+              recorded sounds.</b
             >
+
+            <br />
+            Future goals: separete canvas renders and UI to separete threads,
+            more user friendly text and stand moving, audio cutting for better
+            detail...
+            <br />
+            <br />
+            Do you have any suggestion, or you found some weird bug? Send me a
+            email or open issue on Github.
           </p>
         </div>
       </div>
