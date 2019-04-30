@@ -1,11 +1,11 @@
 var canvas = document.getElementById("canvasID");
 var renderer = new THREE.WebGLRenderer({ canvas: canvas });
-renderer.setSize(canvas.width, canvas.height);
 
+var currentWaveFormMesh;
 var scene = new THREE.Scene();
-scene.background = new THREE.Color(0xf0f0f0);
+scene.background = new THREE.Color(0xbedff6);
 var camera = new THREE.PerspectiveCamera(
-  45,
+  75,
   window.innerWidth / window.innerHeight,
   1,
   10000
@@ -13,12 +13,7 @@ var camera = new THREE.PerspectiveCamera(
 
 var exporter = new THREE.STLExporter();
 
-var geometry = new THREE.BoxGeometry(1, 1, 1);
-var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-var cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
-
-var geometry = new THREE.PlaneGeometry(20, 20, 20);
+var geometry = new THREE.PlaneGeometry(1400, 1400, 1400);
 var material = new THREE.MeshBasicMaterial({
   color: 0xfffff0,
   side: THREE.DoubleSide
@@ -26,19 +21,18 @@ var material = new THREE.MeshBasicMaterial({
 
 var plane = new THREE.Mesh(geometry, material);
 rotateObject(plane, 90);
-plane.position.set(0, -1, 0);
+plane.position.set(0, -100, 0);
 scene.add(plane);
 
-var axesHelper = new THREE.AxesHelper(5);
+var axesHelper = new THREE.AxesHelper(20);
 scene.add(axesHelper);
 
 var light = new THREE.DirectionalLight(0xffffff);
 light.position.set(0, 1, 1).normalize();
 scene.add(light);
 
-var gridHelper = new THREE.GridHelper(400, 40, 0x0000ff, 0x808080);
-gridHelper.position.y = -0.1;
-gridHelper.position.x = -0.1;
+var gridHelper = new THREE.GridHelper(4000, 80, 0x0000ff, 0x808080);
+gridHelper.position.y = -10;
 scene.add(gridHelper);
 
 controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -51,117 +45,181 @@ controls.maxDistance = 500;
 //controls.maxPolarAngle = Math.PI / 2;
 
 //controls.update() must be called after any manual changes to the camera's transform
-camera.position.set(5, 5, 10);
+camera.position.set(-25, 25, 20);
 controls.update();
 
 function animate() {
   requestAnimationFrame(animate);
-
-  // required if controls.enableDamping or controls.autoRotate are set to true
   controls.update();
-
   renderer.render(scene, camera);
 }
-
 animate();
 
-//TESTING
+async function add3DWaveformFromData(values) {
+  var step = Number(document.getElementById("step").value);
+  var offset = Number(document.getElementById("offset").value);
+  var heightScale = Number(document.getElementById("heightScale").value);
 
-var group = new THREE.Group();
-//group.position.y = 4;
-scene.add(group);
+  var red = 255;
+  var green = 0;
+  var blue = 0;
+  var opacity = 1;
 
-var californiaPts = [];
-californiaPts.push(new THREE.Vector2(610, 320));
-californiaPts.push(new THREE.Vector2(450, 300));
-californiaPts.push(new THREE.Vector2(392, 392));
-californiaPts.push(new THREE.Vector2(266, 438));
-californiaPts.push(new THREE.Vector2(190, 570));
-californiaPts.push(new THREE.Vector2(190, 600));
-californiaPts.push(new THREE.Vector2(160, 620));
-californiaPts.push(new THREE.Vector2(160, 650));
-californiaPts.push(new THREE.Vector2(180, 640));
-californiaPts.push(new THREE.Vector2(165, 680));
-californiaPts.push(new THREE.Vector2(150, 670));
-californiaPts.push(new THREE.Vector2(90, 737));
-californiaPts.push(new THREE.Vector2(80, 795));
-californiaPts.push(new THREE.Vector2(50, 835));
-californiaPts.push(new THREE.Vector2(64, 870));
-californiaPts.push(new THREE.Vector2(60, 945));
-californiaPts.push(new THREE.Vector2(300, 945));
-californiaPts.push(new THREE.Vector2(300, 743));
-californiaPts.push(new THREE.Vector2(600, 473));
-californiaPts.push(new THREE.Vector2(626, 425));
-californiaPts.push(new THREE.Vector2(600, 370));
-californiaPts.push(new THREE.Vector2(600, 370));
-californiaPts.push(new THREE.Vector2(610, 320));
+  if (picker.color._rgba != null) {
+    red = picker.color._rgba[0];
+    green = picker.color._rgba[1];
+    blue = picker.color._rgba[2];
+    opacity = picker.color._rgba[3];
+  }
 
-for (var i = 0; i < californiaPts.length; i++)
-  californiaPts[i].multiplyScalar(0.25);
-var californiaShape = new THREE.Shape(californiaPts);
+  g_material = new THREE.MeshPhongMaterial({
+    color: new THREE.Color("rgb(" + red + ", " + green + ", " + blue + ")"),
+    shininess: 66,
+    opacity: opacity,
+    transparent: true,
+    side: THREE.DoubleSide
+  });
 
-var extrudeSettings = {
-  depth: 15,
-  bevelEnabled: false
-};
+  var waveFormType = document
+    .getElementsByClassName("activeTab")[0]
+    .getAttribute("value");
 
-addShape(californiaShape, extrudeSettings, 0xff0000, 5, 5, 5, 0, 0, 0, 0.1);
-var exportMesh;
-function addShape(shape, extrudeSettings, color, x, y, z, rx, ry, rz, s) {
-  // extruded shape
-  var geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
-  var mesh = new THREE.Mesh(
-    geometry,
-    new THREE.MeshPhongMaterial({
-      color: color,
-      shininess: 66,
-      opacity: 0.3,
-      transparent: true,
-      side: THREE.DoubleSide
-    })
-  );
-  mesh.position.set(x, y, z);
-  mesh.rotation.set(rx, ry, rz);
-  mesh.scale.set(s, s, s);
-  group.add(mesh);
-  exportMesh = group;
+  var waveFormMesh;
+  if (waveFormType == "flat") {
+    waveFormMesh = await addFlat3DWaveForm(values, step, heightScale, offset);
+  } else {
+    waveFormMesh = await addCircle3DWaveForm(values, step, heightScale, offset);
+  }
 
-  var edges = new THREE.EdgesGeometry(mesh.geometry);
-  var line = new THREE.LineSegments(edges);
-  line.material.depthTest = false;
-  line.material.opacity = 0.25;
-  line.material.transparent = true;
-  line.position.x = -4;
-  group.add(line);
-  scene.add(new THREE.BoxHelper(line));
-  //scene.add(new THREE.BoxHelper(group));
-  //scene.add(new THREE.BoxHelper(scene));
+  document.getElementById("loadingScreen").style.display = "block";
+  if (document.getElementById("addTextFlat").checked) {
+    var text = String(document.getElementById("textFlat").value);
+    var textDepth = Number(document.getElementById("textDepth").value);
+    var textX = Number(document.getElementById("flatXtext").value);
+    var textY = Number(document.getElementById("flatYtext").value);
+    var textZ = Number(document.getElementById("flatZtext").value);
+    var textSize = Number(document.getElementById("textSize").value);
+    var type;
+    var radiosText = document.getElementsByName("textTypeFlat");
+    for (var i = 0, length = radiosText.length; i < length; i++) {
+      if (radiosText[i].checked) {
+        type = radiosText[i].value;
+        break;
+      }
+    }
+
+    waveFormMesh = await addText(
+      waveFormMesh,
+      text,
+      textDepth,
+      textSize,
+      type,
+      textX,
+      textY,
+      textZ
+    );
+  }
+
+  if (document.getElementById("addStand").checked) {
+    waveFormMesh = await loadStand(waveFormMesh);
+  }
+  document.getElementById("loadingScreen").style.display = "none";
+  updateMesh(waveFormMesh);
 }
 
-var link = document.createElement("a");
-link.style.display = "none";
-document.body.appendChild(link);
+async function loadStand(waveMesh) {
+  var cylinderX = Number(document.getElementById("cylinderX").value);
+  var cylinderY = Number(document.getElementById("cylinderY").value);
+  var cylinderZ = Number(document.getElementById("cylinderZ").value);
+  var cylinderRadius = Number(document.getElementById("cylinderRadius").value);
+  var cylinderHeight = Number(document.getElementById("cylinderHeight").value);
+  var radiosCylinder = document.getElementsByName("radiosCylinderType");
+  var radiosCylinderType;
+  for (var i = 0, length = radiosCylinder.length; i < length; i++) {
+    if (radiosCylinder[i].checked) {
+      radiosCylinderType = radiosCylinder[i].value;
+      break;
+    }
+  }
 
-function add3DWaveformFromData(values) {
+  var geometry = new THREE.CylinderGeometry(
+    cylinderRadius,
+    cylinderRadius,
+    cylinderHeight,
+    32
+  );
+  var material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+  var cylinder = new THREE.Mesh(geometry, material);
+  cylinder.geometry.applyMatrix(
+    new THREE.Matrix4().makeTranslation(cylinderX, cylinderY, cylinderZ)
+  );
+  var mesh_bsp = new ThreeBSP(waveMesh);
+  var cylinder_bsp = new ThreeBSP(cylinder);
+
+  if (radiosCylinderType == "subtract") {
+    var subtract_bsp = mesh_bsp.subtract(cylinder_bsp);
+  } else {
+    var subtract_bsp = mesh_bsp.union(cylinder_bsp);
+  }
+  var result = subtract_bsp.toMesh(g_material);
+
+  return result;
+}
+
+async function addCircle3DWaveForm(values, step, heightScale, offset) {
+  var segmets = Number(document.getElementById("segmets").value);
+  var points = [];
+
+  var stepValue = step;
+  points.push(new THREE.Vector2(0, 0));
+  for (let i = 0; i < values.length; i++) {
+    points.push(new THREE.Vector2(values[i] * heightScale + offset, stepValue));
+    stepValue += step;
+  }
+  points.push(new THREE.Vector2(0, stepValue + step));
+
+  var geometry = new THREE.LatheGeometry(points, segmets);
+  var mesh = new THREE.Mesh(geometry, g_material);
+
+  //Rotate
+  mesh.geometry.applyMatrix(new THREE.Matrix4().makeRotationZ(4.71238898));
+
+  return mesh;
+}
+
+async function addFlat3DWaveForm(values, step, heightScale, offset) {
+  var depth = Number(document.getElementById("flatDepth").value);
+  var side;
+  var radios = document.getElementsByName("side");
+  for (var i = 0, length = radios.length; i < length; i++) {
+    if (radios[i].checked) {
+      side = radios[i].value;
+      break;
+    }
+  }
+
   var points = [];
   points.push(new THREE.Vector2(0, 0));
-  var step = 1;
+
   var stepValue = step;
   for (let i = 0; i < values.length; i++) {
-    points.push(new THREE.Vector2(stepValue, values[i] * 50));
+    points.push(new THREE.Vector2(stepValue, values[i] * heightScale + offset));
     stepValue += step;
   }
   points.push(new THREE.Vector2(stepValue + step, 0));
-  stepValue -= step;
-  values = values.reverse();
-  for (let i = 0; i < values.length; i++) {
-    points.push(new THREE.Vector2(stepValue, -values[i] * 50));
-    stepValue -= step;
-  }
 
-  console.log(points);
+  if (side == "two") {
+    stepValue -= step;
+    values = values.reverse();
+    for (let i = 0; i < values.length; i++) {
+      points.push(
+        new THREE.Vector2(stepValue, -values[i] * heightScale - offset)
+      );
+      stepValue -= step;
+    }
+  }
   var extrudeSettings = {
-    depth: 8,
+    depth: depth,
     bevelEnabled: false
     //bevelSegments: 2,
     //steps: 2,
@@ -169,23 +227,90 @@ function add3DWaveformFromData(values) {
     //bevelThickness: 1
   };
   var pointsShape = new THREE.Shape(points);
-  addShape(pointsShape, extrudeSettings, 0xff0000, 5, 5, 5, 0, 0, 0, 1);
+  var geometry = new THREE.ExtrudeBufferGeometry(pointsShape, extrudeSettings);
+
+  //work around, so that THREEBSP works
+  var normal_geometry = new THREE.Geometry().fromBufferGeometry(geometry);
+
+  var mesh = new THREE.Mesh(normal_geometry, g_material);
+
+  return mesh;
+}
+
+function loadFont(url) {
+  return new Promise(resolve => {
+    new THREE.FontLoader().load(url, resolve);
+  });
+}
+
+async function addText(mesh, textLocal, depth, textSize, type, x, y, z) {
+  var font;
+  if (document.getElementById("addFontFromFile").checked) {
+    font = new THREE.FontLoader().parse(JSON.parse(g_font));
+  } else {
+    font = await loadFont("/font2.json");
+  }
+  console.log(font);
+
+  var mesh_bsp = new ThreeBSP(mesh);
+  var textGeo = new THREE.TextGeometry(textLocal, {
+    size: textSize,
+    height: depth,
+    curveSegments: 6,
+    font: font //new THREE.Font(g_font)
+  });
+
+  var text = new THREE.Mesh(textGeo, g_material);
+  text.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(x, y, z));
+
+  var text_bsp = new ThreeBSP(text);
+  if (type == "subtract") {
+    var subtract_bsp = mesh_bsp.subtract(text_bsp);
+  } else {
+    var subtract_bsp = mesh_bsp.union(text_bsp);
+  }
+  result = subtract_bsp.toMesh(g_material);
+  //result.geometry.computeVertexNormals();
+
+  return result;
+}
+
+var g_font = "/font2.json";
+document.getElementById("fontFile").addEventListener("change", e => {
+  var file = e.target.files[0];
+  var fileReader = new FileReader();
+  fileReader.readAsText(file);
+  fileReader.onload = (function(text) {
+    return function() {
+      g_font = text.result;
+    };
+  })(fileReader);
+});
+
+async function updateMesh(newMesh) {
+  scene.remove(currentWaveFormMesh);
+  currentWaveFormMesh = newMesh;
+  scene.add(newMesh);
 }
 
 //HELPER FUNCTION
-function rotateObject(object, degreeX = 0, degreeY = 0, degreeZ = 0) {
-  object.rotateX(THREE.Math.degToRad(degreeX));
-  object.rotateY(THREE.Math.degToRad(degreeY));
-  object.rotateZ(THREE.Math.degToRad(degreeZ));
+function rotateObject(mesh, degreeX = 0, degreeY = 0, degreeZ = 0) {
+  mesh.rotateX(THREE.Math.degToRad(degreeX));
+  mesh.rotateY(THREE.Math.degToRad(degreeY));
+  mesh.rotateZ(THREE.Math.degToRad(degreeZ));
 }
 
 //EXPORT FUNCTIONS
+var link = document.createElement("a");
+link.style.display = "none";
+document.body.appendChild(link);
+
 function saveArrayBuffer(buffer, filename) {
   save(new Blob([buffer], { type: "application/octet-stream" }), filename);
 }
 function exportBinary() {
-  var result = exporter.parse(exportMesh, { binary: true });
-  saveArrayBuffer(result, "box.stl");
+  var result = exporter.parse(currentWaveFormMesh, { binary: true });
+  saveArrayBuffer(result, "waveForm3D.stl");
 }
 
 function save(blob, filename) {
@@ -203,22 +328,52 @@ const remaining = svg.querySelector("#remaining");
 const width = svg.getAttribute("width");
 const height = svg.getAttribute("height");
 svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-const smoothing = 1;
+var smoothing = 4;
+var currentWaveFormData = null;
+var currentAudioBuffer = null;
+var startAudioTime;
+var endAudioTime;
+
+var startAudioTimeTemp;
+var endAudioTimeTemp;
+
+var audioDuration;
+
+var smoothingInput = document.getElementById("smoothing");
+smoothingInput.addEventListener("change", function() {
+  smoothing = Number(smoothingInput.value);
+
+  currentWaveFormData = getWaveformData(currentAudioBuffer, width / smoothing);
+  svg
+    .querySelector("path")
+    .setAttribute("d", getSVGPath(currentWaveFormData, height, smoothing));
+});
 
 svg.addEventListener("click", e => {
   const position = e.offsetX / svg.getBoundingClientRect().width;
   audio.currentTime = position * audio.duration;
 });
 
+var startPauseButton = document.getElementById("playPauseAudio");
+startPauseButton.addEventListener("click", function() {
+  console.log(audio.paused);
+  if (audio.paused) {
+    startPauseButton.style.backgroundColor = "yellow";
+    audio.play();
+  } else {
+    startPauseButton.style.backgroundColor = "green";
+    audio.pause();
+  }
+});
+
+audio.addEventListener("ended", function() {
+  startPauseButton.style.backgroundColor = "green";
+});
+
 //audio from file
-document.querySelector("input").addEventListener("change", e => {
+document.querySelector("#inputSoundFile").addEventListener("change", e => {
   const file = e.target.files[0];
-  const reader = new FileReader();
-
-  reader.readAsArrayBuffer(file);
-  attachToAudio(file);
-
-  reader.onload = e => processTrack(e.target.result);
+  proccesBlob(file);
 });
 
 //audio from michrophone
@@ -238,7 +393,7 @@ if (navigator.mediaDevices.getUserMedia) {
       mediaRecorder.start();
       console.log(mediaRecorder.state);
       console.log("recorder started");
-      record.style.background = "red";
+      stop.style.background = "red";
 
       stop.disabled = false;
       record.disabled = true;
@@ -248,8 +403,8 @@ if (navigator.mediaDevices.getUserMedia) {
       mediaRecorder.stop();
       console.log(mediaRecorder.state);
       console.log("recorder stopped");
-      record.style.background = "";
-      record.style.color = "";
+      stop.style.background = "";
+      stop.style.color = "";
       // mediaRecorder.requestData();
 
       stop.disabled = true;
@@ -259,11 +414,7 @@ if (navigator.mediaDevices.getUserMedia) {
     mediaRecorder.onstop = function(e) {
       var blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
       chunks = [];
-
-      const micreader = new FileReader();
-      micreader.readAsArrayBuffer(blob);
-      micreader.onload = e => processTrack(e.target.result);
-      attachToAudio(blob);
+      proccesBlob(blob);
     };
 
     mediaRecorder.ondataavailable = function(e) {
@@ -285,13 +436,27 @@ const avg = values =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
 const max = values => values.reduce((max, value) => Math.max(max, value), 0);
 
-function getWaveformData(audioBuffer, dataPoints) {
-  const leftChannel = audioBuffer.getChannelData(0);
+function getWaveformData(
+  audioBuffer,
+  dataPoints,
+  normalizeLeftCutPosition = 0,
+  normalizeRightCutPosition = 1
+) {
+  var tempLeftAudioCutIndex =
+    audioBuffer.getChannelData(0).length * normalizeLeftCutPosition;
+  var tempRightAudioCutIndex =
+    audioBuffer.getChannelData(0).length * normalizeRightCutPosition;
+
+  var leftChannel = audioBuffer
+    .getChannelData(0)
+    .slice(tempLeftAudioCutIndex, tempRightAudioCutIndex);
   var rightChannel;
   if (audioBuffer.numberOfChannels == 1) {
-    rightChannel = audioBuffer.getChannelData(0); //TODO: temp fix if sound is mono
+    rightChannel = leftChannel;
   } else {
-    rightChannel = audioBuffer.getChannelData(1);
+    rightChannel = audioBuffer
+      .getChannelData(1)
+      .slice(tempLeftAudioCutIndex, tempRightAudioCutIndex);
   }
   console.log(leftChannel);
   const values = new Float32Array(dataPoints);
@@ -305,7 +470,7 @@ function getWaveformData(audioBuffer, dataPoints) {
       buffer = [];
     }
   }
-  console.log(values);
+  //console.log(values);
   //add3DWaveformFromData(values);
   return values;
 }
@@ -319,46 +484,157 @@ function getSVGPath(waveformData) {
   return path;
 }
 function attachToAudio(file) {
-  audio.setAttribute("autoplay", true);
   audio.src = URL.createObjectURL(file);
+  // DO I want autoplay?
+  // audio.setAttribute("autoplay", true);
+
+  remaining.setAttribute("width", width);
   updateAudioPosition();
 }
+
+var startTimeSpan = document.getElementById("startTimeSpan");
+var endTimeSpan = document.getElementById("endTimeSpan");
+
+audio.addEventListener("durationchange", function() {
+  startAudioTime = 0;
+  startAudioTimeTemp = 0;
+  endAudioTime = audio.duration;
+  endAudioTimeTemp = audio.duration;
+  audioDuration = audio.duration;
+  endTimeSpan.innerText = formatTime(audio.duration);
+
+  //Chrome bug workaround
+  if (audio.duration === Infinity) {
+    audio.currentTime = 1e101;
+    audio.ontimeupdate = function() {
+      this.ontimeupdate = () => {
+        return;
+      };
+      audio.currentTime = 0.0001;
+      startAudioTime = 0;
+      startAudioTimeTemp = 0;
+      endAudioTime = audio.duration;
+      endAudioTimeTemp = audio.duration;
+      audioDuration = audio.duration;
+      endTimeSpan.innerText = formatTime(audio.duration);
+    };
+  }
+});
+
+var currentTimeSpan = document.getElementById("currentTimeSpan");
 function updateAudioPosition() {
-  const { currentTime, duration } = audio;
-  const physicalPosition = (currentTime / duration) * width;
+  const physicalPosition =
+    ((audio.currentTime - startAudioTimeTemp) / audioDuration) * width;
+
   if (physicalPosition) {
     progress.setAttribute("width", physicalPosition);
     remaining.setAttribute("x", physicalPosition);
     remaining.setAttribute("width", width - physicalPosition);
   }
+
+  var currentTimePosition =
+    ((audio.currentTime - startAudioTimeTemp) / audioDuration) *
+    (audioCuttingWindow.offsetWidth - currentTimeSpan.offsetWidth);
+  if (
+    currentTimePosition >
+    audioCuttingWindow.offsetWidth - currentTimeSpan.offsetWidth
+  ) {
+    currentTimePosition =
+      audioCuttingWindow.offsetWidth - currentTimeSpan.offsetWidth;
+  }
+  currentTimeSpan.style.marginLeft = currentTimePosition + "px";
+
+  currentTimeSpan.innerText = formatTime(audio.currentTime);
+  //loop audio playing between cutters
+  if (audio.currentTime > endAudioTime) {
+    audio.currentTime = startAudioTime;
+  }
   requestAnimationFrame(updateAudioPosition);
 }
+
+function formatTime(seconds) {
+  minutes = Math.floor(seconds / 60);
+  minutes = minutes >= 10 ? minutes : "0" + minutes;
+  seconds = Math.floor(seconds % 60);
+  seconds = seconds >= 10 ? seconds : "0" + seconds;
+  return minutes + ":" + seconds;
+}
+
 function processTrack(buffer) {
   const source = audioContext.createBufferSource();
-  console.time("decodeAudioData");
   return audioContext
     .decodeAudioData(buffer)
     .then(audioBuffer => {
-      console.timeEnd("decodeAudioData");
-      console.time("getWaveformData");
-      const waveformData = getWaveformData(audioBuffer, width / smoothing);
-      console.timeEnd("getWaveformData");
-      console.time("getSVGPath");
+      currentAudioBuffer = audioBuffer;
+      currentWaveFormData = getWaveformData(audioBuffer, width / smoothing);
       svg
         .querySelector("path")
-        .setAttribute("d", getSVGPath(waveformData, height, smoothing));
-      console.timeEnd("getSVGPath");
+        .setAttribute("d", getSVGPath(currentWaveFormData, height, smoothing));
       source.buffer = audioBuffer;
       source.connect(audioContext.destination);
-
-      add3DWaveformFromData(waveformData);
     })
     .catch(console.error);
 }
 
+function proccesBlob(blob) {
+  const reader = new FileReader();
+  currentBlob = blob;
+  console.log(blob);
+  reader.readAsArrayBuffer(blob);
+  reader.onload = e => processTrack(e.target.result);
+  attachToAudio(blob);
+}
+
 //CUTTING AUDIO
-dragElement(document.getElementById("leftAudioCutter"));
-dragElement(document.getElementById("rightAudioCutter"));
+var normalizedLeftCutterPosition = 0;
+var normalizedRightCutterPosition = 1;
+
+var leftAudioCutter = document.getElementById("leftAudioCutter");
+var rightAudioCutter = document.getElementById("rightAudioCutter");
+var audioCuttingWindow = document.getElementById("audioCuttingWindow");
+var cutWindow = document.getElementById("cutWindow");
+cutWindow.style.width = audioCuttingWindow.offsetWidth - 36 + "px";
+var cutWindowStartWidth = audioCuttingWindow.offsetWidth - 40;
+console.log(audioCuttingWindow.offsetWidth);
+
+var SVG2DWaveform = document.getElementById("SVG2DWaveform");
+console.log(SVG2DWaveform.style.width);
+
+/*
+//IN DEVELOPMENT
+//recalculate values of audio buffer 
+var cutAudioButton = document.getElementById("cutAudioButton");
+cutAudioButton.addEventListener("click", function() {
+  startAudioTimeTemp =
+    startAudioTimeTemp + audioDuration * normalizedLeftCutterPosition;
+  endAudioTimeTemp =
+    endAudioTimeTemp -
+    (audioDuration - audioDuration * normalizedRightCutterPosition);
+  audioDuration = endAudioTimeTemp - startAudioTimeTemp;
+
+  currentWaveFormData = getWaveformData(
+    currentAudioBuffer,
+    width / smoothing,
+    normalizedLeftCutterPosition,
+    normalizedRightCutterPosition
+  );
+  svg
+    .querySelector("path")
+    .setAttribute("d", getSVGPath(currentWaveFormData, height, smoothing));
+});
+*/
+var vizualizeCutWindow = document.getElementById("vizualizeCutWindow");
+vizualizeCutWindow.addEventListener("click", function() {
+  add3DWaveformFromData(
+    currentWaveFormData.slice(
+      currentWaveFormData.length * normalizedLeftCutterPosition,
+      currentWaveFormData.length * normalizedRightCutterPosition
+    )
+  );
+});
+
+dragElement(leftAudioCutter);
+dragElement(rightAudioCutter);
 
 function dragElement(elmnt) {
   var pos1 = 0,
@@ -389,8 +665,59 @@ function dragElement(elmnt) {
     pos4 = e.clientY;
     // set the element's new position:
     //elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-    elmnt.style.left = elmnt.offsetLeft - pos1 + "px";
-    console.log(elmnt.offsetLeft);
+    if (elmnt.offsetLeft - pos1 < 0) {
+      elmnt.style.left = "0px";
+    } else {
+      elmnt.style.left = elmnt.offsetLeft - pos1 + "px";
+    }
+
+    if (elmnt.id == "leftAudioCutter") {
+      if (elmnt.offsetLeft + 18 >= rightAudioCutter.offsetLeft) {
+        //preventing crossing
+        elmnt.style.left = rightAudioCutter.offsetLeft - 18 + "px";
+      }
+      //resize cut window to fit between cutters
+      cutWindow.style.left = elmnt.offsetLeft + 18 + "px";
+      cutWindow.style.width =
+        cutWindowStartWidth -
+        elmnt.offsetLeft -
+        (cutWindowStartWidth - rightAudioCutter.offsetLeft) -
+        18 +
+        "px";
+      normalizedLeftCutterPosition =
+        leftAudioCutter.offsetLeft / audioCuttingWindow.offsetWidth;
+      startAudioTime =
+        startAudioTimeTemp + audioDuration * normalizedLeftCutterPosition;
+    }
+
+    if (elmnt.id == "rightAudioCutter") {
+      if (elmnt.offsetLeft - 18 <= leftAudioCutter.offsetLeft) {
+        elmnt.style.left = leftAudioCutter.offsetLeft + 18 + "px";
+      }
+
+      if (elmnt.offsetLeft >= audioCuttingWindow.offsetWidth - 18) {
+        // preventing right cutter leaving screen
+        elmnt.style.left = audioCuttingWindow.offsetWidth - 18 + "px";
+      }
+      //resize cut window to fit between cutters
+      cutWindow.style.width =
+        cutWindowStartWidth -
+        (cutWindowStartWidth - elmnt.offsetLeft) -
+        leftAudioCutter.offsetLeft -
+        18 +
+        "px";
+      normalizedRightCutterPosition =
+        (rightAudioCutter.offsetLeft - 18) /
+        (audioCuttingWindow.offsetWidth - 36);
+      endAudioTime =
+        endAudioTimeTemp -
+        (audioDuration - audioDuration * normalizedRightCutterPosition);
+    }
+
+    console.log(endAudioTime);
+    console.log(audio.currentTime);
+    console.log("Left: " + normalizedLeftCutterPosition);
+    console.log("Right: " + normalizedRightCutterPosition);
   }
 
   function closeDragElement() {
@@ -398,4 +725,235 @@ function dragElement(elmnt) {
     document.onmouseup = null;
     document.onmousemove = null;
   }
+}
+
+//COLOR PICKER
+var g_material;
+var colorWaveForm = document.querySelector("#colorWaveForm");
+var picker = new Picker({
+  parent: colorWaveForm,
+  popup: "bottom",
+  color: "#ffffff"
+});
+
+picker.onChange = function(color) {
+  colorWaveForm.style.background = color.rgbaString;
+};
+
+//TABS
+var tabs = document.querySelectorAll("#tabstrip > span"),
+  panels = document.querySelectorAll("#tabstrip > div"),
+  length = tabs.length,
+  currentTab,
+  currentPanel;
+
+function getToggler(newTab, newPanel) {
+  return function() {
+    currentTab.className = "tab inactiveTab";
+    currentPanel.className = "inactivePanel";
+    newTab.className = "tab activeTab";
+    newPanel.className = "activePanel";
+    currentTab = newTab;
+    currentPanel = newPanel;
+  };
+}
+
+if (length !== panels.length)
+  throw new Error(
+    "Number of tabs (" +
+      length +
+      ") and number of content panels (" +
+      panels.length +
+      ") are not equal"
+  );
+
+for (var i = 0; i < length; i++) {
+  var tab = tabs[i];
+  var panel = panels[i];
+
+  tab.className = "tab inactiveTab";
+  tab.addEventListener("click", getToggler(tab, panel), false);
+  panel.className = "inactivePanel";
+}
+
+currentTab = tabs[0];
+currentPanel = panels[0];
+currentTab.className = "tab activeTab";
+currentPanel.className = "activePanel";
+
+//DOWNLOAD .wav
+function audioBufferToWav(buffer, opt) {
+  opt = opt || {};
+
+  var numChannels = buffer.numberOfChannels;
+  var sampleRate = buffer.sampleRate;
+  var format = opt.float32 ? 3 : 1;
+  var bitDepth = format === 3 ? 32 : 16;
+
+  var result;
+  if (numChannels === 2) {
+    result = interleave(buffer.getChannelData(0), buffer.getChannelData(1));
+  } else {
+    result = buffer.getChannelData(0);
+  }
+
+  return encodeWAV(result, format, sampleRate, numChannels, bitDepth);
+}
+
+function encodeWAV(samples, format, sampleRate, numChannels, bitDepth) {
+  var bytesPerSample = bitDepth / 8;
+  var blockAlign = numChannels * bytesPerSample;
+
+  var buffer = new ArrayBuffer(44 + samples.length * bytesPerSample);
+  var view = new DataView(buffer);
+
+  /* RIFF identifier */
+  writeString(view, 0, "RIFF");
+  /* RIFF chunk length */
+  view.setUint32(4, 36 + samples.length * bytesPerSample, true);
+  /* RIFF type */
+  writeString(view, 8, "WAVE");
+  /* format chunk identifier */
+  writeString(view, 12, "fmt ");
+  /* format chunk length */
+  view.setUint32(16, 16, true);
+  /* sample format (raw) */
+  view.setUint16(20, format, true);
+  /* channel count */
+  view.setUint16(22, numChannels, true);
+  /* sample rate */
+  view.setUint32(24, sampleRate, true);
+  /* byte rate (sample rate * block align) */
+  view.setUint32(28, sampleRate * blockAlign, true);
+  /* block align (channel count * bytes per sample) */
+  view.setUint16(32, blockAlign, true);
+  /* bits per sample */
+  view.setUint16(34, bitDepth, true);
+  /* data chunk identifier */
+  writeString(view, 36, "data");
+  /* data chunk length */
+  view.setUint32(40, samples.length * bytesPerSample, true);
+  if (format === 1) {
+    // Raw PCM
+    floatTo16BitPCM(view, 44, samples);
+  } else {
+    writeFloat32(view, 44, samples);
+  }
+
+  return buffer;
+}
+
+function interleave(inputL, inputR) {
+  var length = inputL.length + inputR.length;
+  var result = new Float32Array(length);
+
+  var index = 0;
+  var inputIndex = 0;
+
+  while (index < length) {
+    result[index++] = inputL[inputIndex];
+    result[index++] = inputR[inputIndex];
+    inputIndex++;
+  }
+  return result;
+}
+
+function writeFloat32(output, offset, input) {
+  for (var i = 0; i < input.length; i++, offset += 4) {
+    output.setFloat32(offset, input[i], true);
+  }
+}
+
+function floatTo16BitPCM(output, offset, input) {
+  for (var i = 0; i < input.length; i++, offset += 2) {
+    var s = Math.max(-1, Math.min(1, input[i]));
+    output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+  }
+}
+
+function writeString(view, offset, string) {
+  for (var i = 0; i < string.length; i++) {
+    view.setUint8(offset + i, string.charCodeAt(i));
+  }
+}
+
+var anchor = document.createElement("a");
+document.body.appendChild(anchor);
+anchor.style = "display: none";
+var downloadWavButton = document.getElementById("downloadWavButton");
+downloadWavButton.addEventListener("click", function() {
+  AudioBufferSlice(
+    currentAudioBuffer,
+    normalizedLeftCutterPosition * audio.duration,
+    normalizedRightCutterPosition * audio.duration,
+    function(error, slicedAudioBuffer) {
+      var wav = audioBufferToWav(slicedAudioBuffer);
+      var blob = new window.Blob([new DataView(wav)], {
+        type: "audio/wav"
+      });
+
+      var url = window.URL.createObjectURL(blob);
+      anchor.href = url;
+      anchor.download = "audio.wav";
+      anchor.click();
+      window.URL.revokeObjectURL(url);
+    }
+  );
+});
+
+function AudioBufferSlice(buffer, begin, end, callback) {
+  if (!(this instanceof AudioBufferSlice)) {
+    return new AudioBufferSlice(buffer, begin, end, callback);
+  }
+
+  var error = null;
+
+  var duration = buffer.duration;
+  var channels = buffer.numberOfChannels;
+  var rate = buffer.sampleRate;
+
+  if (typeof end === "function") {
+    callback = end;
+    end = duration;
+  }
+
+  // milliseconds to seconds
+
+  if (begin < 0) {
+    error = new RangeError("begin time must be greater than 0");
+  }
+
+  if (end > duration) {
+    error = new RangeError(
+      "end time must be less than or equal to " + duration
+    );
+  }
+
+  if (typeof callback !== "function") {
+    error = new TypeError("callback must be a function");
+  }
+
+  var startOffset = rate * begin;
+  var endOffset = rate * end;
+  var frameCount = endOffset - startOffset;
+  var newArrayBuffer;
+
+  try {
+    newArrayBuffer = audioContext.createBuffer(
+      channels,
+      endOffset - startOffset,
+      rate
+    );
+    var anotherArray = new Float32Array(frameCount);
+    var offset = 0;
+
+    for (var channel = 0; channel < channels; channel++) {
+      buffer.copyFromChannel(anotherArray, channel, startOffset);
+      newArrayBuffer.copyToChannel(anotherArray, channel, offset);
+    }
+  } catch (e) {
+    error = e;
+  }
+
+  callback(error, newArrayBuffer);
 }

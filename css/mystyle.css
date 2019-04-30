@@ -1,30 +1,58 @@
+body {
+  background-color: black;
+  background-image: url("../assets/whitenoise-1920x1080.png");
+  font-size: 0.85em !important;
+  font-family: Arial, Helvetica, sans-serif;
+  color: white;
+}
 #leftAudioCutter {
   position: absolute;
   z-index: 9;
-  background-color: blue;
+  background-color: rgb(51, 51, 51);
   text-align: center;
-  border: 2px solid #d3d3d3;
+  border: 2px solid rgb(250, 184, 1);
   cursor: e-resize;
   height: 100px;
   width: 18px;
   border-radius: 10px 0px 0px 10px;
+  left: 0px;
 }
 
 #rightAudioCutter {
   position: absolute;
   z-index: 9;
-  background-color: blue;
+  background-color: rgb(51, 51, 51);
   text-align: center;
-  border: 2px solid #d3d3d3;
+  border: 2px solid rgb(250, 184, 1);
   cursor: e-resize;
   height: 100px;
   width: 18px;
   border-radius: 0px 10px 10px 0px;
-  right: 0;
+  right: 0px;
 }
 
-.audio {
-  width: 100%;
+#audioCuttingWindow {
+  background: rgb(112, 112, 112);
+  position: relative;
+  padding-left: 18px;
+  padding-right: 14px;
+  border-radius: 10px;
+}
+
+#cutWindow {
+  position: absolute;
+  background-color: rgba(145, 154, 190, 0.432);
+  height: 100%;
+  width: 100px;
+  left: 18px;
+  pointer-events: none;
+}
+
+#endTimeSpan {
+  float: right;
+}
+
+#currentTimeSpan {
 }
 
 #mydivheader {
@@ -33,4 +61,230 @@
   z-index: 10;
   background-color: #2196f3;
   color: #fff;
+}
+
+#audio2DControls {
+  margin-left: 3%;
+  margin-right: 3%;
+  padding: 1%;
+}
+
+#audio3DControls {
+}
+
+#loadingScreen {
+  display: none;
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  background: rgba(58, 58, 48, 0.8);
+  z-index: 1500;
+}
+
+.center {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+}
+.overlay-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  background: #3a3a3a;
+  border: 1px solid rgb(250, 184, 1);
+
+  z-index: 1000;
+}
+.text-align-center {
+  text-align: center;
+}
+
+.block {
+  /*display: inline-block;
+  vertical-align: top;*/
+  border: 1px solid rgb(250, 184, 1);
+}
+
+button:hover {
+  background-color: #575757;
+  color: rgb(250, 184, 1);
+}
+
+button {
+  color: white;
+  padding: 0.5em;
+  margin: 1em auto;
+  background-color: #3a3a3a;
+  cursor: pointer;
+  border: none;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5em;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.controls {
+  padding-left: 12px;
+}
+
+.xspan {
+  color: red;
+}
+
+.yspan {
+  color: lawngreen;
+}
+
+.zspan {
+  color: blue;
+}
+
+.line {
+  border-top: 1px solid rgb(250, 184, 1);
+  border-left: 0;
+  border-bottom: 0;
+  border-right: 0;
+}
+
+.post-wrapper {
+  width: 85vw;
+  margin: auto;
+  margin-top: 5px;
+}
+.post-row {
+  padding: 8px;
+  background-color: #3a3a3a;
+  border-top: 1px solid rgb(250, 184, 1);
+  border-right: 1px solid rgb(250, 184, 1);
+  border-left: 1px solid rgb(250, 184, 1);
+}
+
+.post-col {
+}
+
+.post-wrapper img {
+  min-width: 250px;
+}
+
+canvas {
+  min-width: 300px;
+  background-color: black;
+  width: 100%;
+  height: auto;
+}
+
+#colorWaveForm {
+  background: red;
+}
+
+footer {
+  padding: 5px;
+  background: #3a3a3a;
+  border-top: 1px solid rgb(250, 184, 1);
+}
+
+footer img {
+  margin-left: 10px;
+  width: 32px;
+  height: 32px;
+}
+
+footer a {
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: none;
+  color: rgb(250, 184, 1);
+}
+
+#tabstrip {
+  padding: 0em;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  width: 100%;
+  border-bottom: 1px solid rgb(250, 184, 1);
+}
+
+.tab {
+  cursor: pointer;
+  float: left;
+
+  border-top: 1px solid rgb(250, 184, 1);
+  min-width: 3em;
+  overflow: hidden;
+  padding: 0.625em;
+  white-space: nowrap;
+
+  width: 50%;
+}
+
+.tab:first-child {
+  border-right: 1px solid rgb(250, 184, 1);
+}
+
+.activeTab {
+  background-color: #575757;
+  color: rgb(250, 184, 1);
+}
+
+.inactiveTab {
+  background-color: #3a3a3a;
+  border-bottom: 1px solid rgb(250, 184, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.inactiveTab:hover {
+  background-color: #3a3a3a;
+  border-bottom: 1px solid rgb(250, 184, 1);
+  background-color: #575757;
+  color: rgb(250, 184, 1);
+}
+
+.activePanel {
+  color: #ffffff;
+
+  clear: both;
+  display: block;
+  padding: 1em;
+}
+
+.inactivePanel {
+  display: none;
+}
+
+#audio3DControls button {
+  width: calc(100% - 10px);
+  margin: 5px;
+}
+
+input[type="number"] {
+  width: 60px;
+  color: white;
+  background: #575757;
+  border: 1px solid #3a3a3a;
+  text-align: center;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+input[type="text"] {
+  width: 50%;
+  color: white;
+  background: #575757;
+  border: 1px solid #3a3a3a;
+}
+
+input [type="file"] {
+  color: white;
+  background: #575757;
+  border: 1px solid #3a3a3a;
 }
