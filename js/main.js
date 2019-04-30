@@ -248,7 +248,7 @@ async function addText(mesh, textLocal, depth, textSize, type, x, y, z) {
   if (document.getElementById("addFontFromFile").checked) {
     font = new THREE.FontLoader().parse(JSON.parse(g_font));
   } else {
-    font = await loadFont("/font2.json");
+    font = await loadFont("assets/font2.json");
   }
   console.log(font);
 
@@ -275,7 +275,7 @@ async function addText(mesh, textLocal, depth, textSize, type, x, y, z) {
   return result;
 }
 
-var g_font = "/font2.json";
+var g_font;
 document.getElementById("fontFile").addEventListener("change", e => {
   var file = e.target.files[0];
   var fileReader = new FileReader();

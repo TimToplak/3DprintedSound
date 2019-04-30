@@ -52,9 +52,6 @@ body {
   float: right;
 }
 
-#currentTimeSpan {
-}
-
 #mydivheader {
   padding: 10px;
 
@@ -67,9 +64,6 @@ body {
   margin-left: 3%;
   margin-right: 3%;
   padding: 1%;
-}
-
-#audio3DControls {
 }
 
 #loadingScreen {
@@ -162,9 +156,6 @@ button {
   border-top: 1px solid rgb(250, 184, 1);
   border-right: 1px solid rgb(250, 184, 1);
   border-left: 1px solid rgb(250, 184, 1);
-}
-
-.post-col {
 }
 
 .post-wrapper img {
