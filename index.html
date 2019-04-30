@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>3D printed sound</title>
+    <link rel="icon" href="assets/iconorange.png" />
     <link rel="stylesheet" href="css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="css/mystyle.css" />
   </head>
@@ -136,13 +137,13 @@
               </div>
 
               <div class="controls">
-                <input checked type="checkbox" id="addTextFlat" /> add text
+                <input type="checkbox" id="addTextFlat" /> add text
 
                 <br />
                 <input type="text" id="textFlat" value="text here" />
                 <br />
                 <input type="checkbox" id="addFontFromFile" /> font from file:
-                <input type="file" id="fontFile" />
+                <input type="file" id="fontFile" accept=".json" />
                 <br />
                 Type:
                 <div class="controls">
@@ -228,7 +229,7 @@
     <div class="post-wrapper">
       <div class="row post-row">
         <div class="col">
-          <img src="assets/flat.jpg" />
+          <img class="img-fluid" src="assets/flat.jpg" />
         </div>
         <div class="col">
           <h4>Parameters explained</h4>
@@ -291,7 +292,7 @@
       </div>
       <div class="row post-row">
         <div class="col">
-          <img src="assets/circle.jpg" />
+          <img class="img-fluid" src="assets/circle.jpg" />
         </div>
         <div class="col">
           <h4>About</h4>

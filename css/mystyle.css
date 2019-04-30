@@ -168,9 +168,7 @@ button {
 }
 
 .post-wrapper img {
-  height: 100%;
-  width: 100%;
-  min-width: 340px;
+  min-width: 250px;
 }
 
 canvas {
@@ -202,6 +200,7 @@ footer a {
 
 footer a:hover {
   text-decoration: none;
+  color: rgb(250, 184, 1);
 }
 
 #tabstrip {
