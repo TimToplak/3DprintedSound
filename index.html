@@ -7,6 +7,21 @@
     <link rel="icon" href="assets/iconorange.png" />
     <link rel="stylesheet" href="css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="css/mystyle.css" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=UA-139357913-1"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "UA-139357913-1");
+    </script>
   </head>
   <body>
     <div id="loadingScreen">
@@ -178,7 +193,7 @@
               </div>
               <hr class="line" align="left" width="100%" />
               <div class="controls">
-                <input type="checkbox" id="addStand" /> add stand
+                <input type="checkbox" id="addStand" /> add stand/hole
                 <br />
                 Cylinder radius:
                 <input id="cylinderRadius" type="number" value="2" />
@@ -186,7 +201,7 @@
                 Clyinder height:
                 <input id="cylinderHeight" type="number" value="5" />
                 <br />
-                Move standhole:
+                Move stand/hole:
                 <br />
                 <div class="controls">
                   <span class="xspan">X</span>:
@@ -281,7 +296,7 @@
             </li>
 
             <li>
-              Stand:
+              Stand/hole:
               <ul>
                 <li><b>Cylinder radius:</b> radius of circle</li>
                 <li><b>Clyinder height:</b> height along Y axis</li>
@@ -304,6 +319,9 @@
               recorded sounds.</b
             >
 
+            <br />
+            Are you looking for simple stand base, you can download it here:
+            <a href="assets/stand.stl" download>download stand.stl</a>
             <br />
             Future goals: separete canvas renders and UI to separete threads,
             more user friendly text and stand moving, audio cutting for better
