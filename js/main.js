@@ -45,8 +45,9 @@ controls.maxDistance = 500;
 //controls.maxPolarAngle = Math.PI / 2;
 
 //controls.update() must be called after any manual changes to the camera's transform
-camera.position.set(-25, 25, 20);
+camera.position.set(40, 35, 80);
 controls.update();
+controls.target.set(80, 0, 0);
 
 function animate() {
   requestAnimationFrame(animate);
@@ -599,6 +600,18 @@ console.log(audioCuttingWindow.offsetWidth);
 
 var SVG2DWaveform = document.getElementById("SVG2DWaveform");
 console.log(SVG2DWaveform.style.width);
+
+window.addEventListener("resize", function(event) {
+  console.log("test");
+  cutWindow.style.width =
+    cutWindowStartWidth -
+    (cutWindowStartWidth - rightAudioCutter.offsetLeft) -
+    leftAudioCutter.offsetLeft -
+    18 +
+    "px";
+  rightAudioCutter.style.right = "0px";
+  rightAudioCutter.style.left = "";
+});
 
 /*
 //IN DEVELOPMENT
