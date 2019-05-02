@@ -45,9 +45,9 @@ controls.maxDistance = 500;
 //controls.maxPolarAngle = Math.PI / 2;
 
 //controls.update() must be called after any manual changes to the camera's transform
-camera.position.set(40, 35, 80);
+camera.position.set(-30, 35, 80);
 controls.update();
-controls.target.set(80, 0, 0);
+controls.target.set(10, 0, 0);
 
 function animate() {
   requestAnimationFrame(animate);
@@ -251,7 +251,6 @@ async function addText(mesh, textLocal, depth, textSize, type, x, y, z) {
   } else {
     font = await loadFont("assets/font2.json");
   }
-  console.log(font);
 
   var mesh_bsp = new ThreeBSP(mesh);
   var textGeo = new THREE.TextGeometry(textLocal, {
@@ -357,7 +356,6 @@ svg.addEventListener("click", e => {
 
 var startPauseButton = document.getElementById("playPauseAudio");
 startPauseButton.addEventListener("click", function() {
-  console.log(audio.paused);
   if (audio.paused) {
     startPauseButton.style.backgroundColor = "yellow";
     audio.play();
@@ -459,7 +457,6 @@ function getWaveformData(
       .getChannelData(1)
       .slice(tempLeftAudioCutIndex, tempRightAudioCutIndex);
   }
-  console.log(leftChannel);
   const values = new Float32Array(dataPoints);
   const dataWindow = Math.round(leftChannel.length / dataPoints);
   for (let i = 0, y = 0, buffer = []; i < leftChannel.length; i++) {
@@ -580,7 +577,6 @@ function processTrack(buffer) {
 function proccesBlob(blob) {
   const reader = new FileReader();
   currentBlob = blob;
-  console.log(blob);
   reader.readAsArrayBuffer(blob);
   reader.onload = e => processTrack(e.target.result);
   attachToAudio(blob);
@@ -596,13 +592,10 @@ var audioCuttingWindow = document.getElementById("audioCuttingWindow");
 var cutWindow = document.getElementById("cutWindow");
 cutWindow.style.width = audioCuttingWindow.offsetWidth - 36 + "px";
 var cutWindowStartWidth = audioCuttingWindow.offsetWidth - 40;
-console.log(audioCuttingWindow.offsetWidth);
 
 var SVG2DWaveform = document.getElementById("SVG2DWaveform");
-console.log(SVG2DWaveform.style.width);
 
 window.addEventListener("resize", function(event) {
-  console.log("test");
   cutWindow.style.width =
     cutWindowStartWidth -
     (cutWindowStartWidth - rightAudioCutter.offsetLeft) -
@@ -726,11 +719,6 @@ function dragElement(elmnt) {
         endAudioTimeTemp -
         (audioDuration - audioDuration * normalizedRightCutterPosition);
     }
-
-    console.log(endAudioTime);
-    console.log(audio.currentTime);
-    console.log("Left: " + normalizedLeftCutterPosition);
-    console.log("Right: " + normalizedRightCutterPosition);
   }
 
   function closeDragElement() {
