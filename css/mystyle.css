@@ -279,3 +279,7 @@ input [type="file"] {
   background: #575757;
   border: 1px solid #3a3a3a;
 }
+
+.googleanalytics {
+  background-color: #3a3a3a;
+}
