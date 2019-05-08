@@ -340,14 +340,18 @@ var endAudioTimeTemp;
 var audioDuration;
 
 var smoothingInput = document.getElementById("smoothing");
-smoothingInput.addEventListener("change", function() {
+var smoothingRange = document.getElementById("smoothingRange");
+smoothingInput.addEventListener("input", smoothingChange);
+smoothingRange.addEventListener("input", smoothingChange);
+
+function smoothingChange() {
   smoothing = Number(smoothingInput.value);
 
   currentWaveFormData = getWaveformData(currentAudioBuffer, width / smoothing);
   svg
     .querySelector("path")
     .setAttribute("d", getSVGPath(currentWaveFormData, height, smoothing));
-});
+}
 
 svg.addEventListener("click", e => {
   const position = e.offsetX / svg.getBoundingClientRect().width;
@@ -958,3 +962,15 @@ function AudioBufferSlice(buffer, begin, end, callback) {
 
   callback(error, newArrayBuffer);
 }
+
+//RANGE SLIDER
+var trs = document.querySelectorAll("table tr");
+trs.forEach(tr => {
+  var inputRange = tr.querySelector("input[type='range']");
+  var inputNumber = tr.querySelector("input[type='number']");
+  if (inputNumber && inputRange) {
+    inputRange.addEventListener("input", function() {
+      inputNumber.value = inputRange.value;
+    });
+  }
+});

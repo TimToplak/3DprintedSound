@@ -121,7 +121,7 @@ body {
 }
 
 button:hover {
-  background-color: #5c80bc;
+  background-color: #c79301;
 }
 
 button {
@@ -207,13 +207,14 @@ footer img {
   height: 32px;
 }
 
-footer a {
+a {
+  color: #fab801;
   text-decoration: none;
 }
 
-footer a:hover {
+a:hover {
   text-decoration: none;
-  color: #fab801;
+  color: #c79301;
 }
 
 #tabstrip {
@@ -242,16 +243,22 @@ footer a:hover {
 }
 
 .inactiveTab {
-  background-color: #30323d;
+  background-color: #fab801;
   border-bottom: 1.5px solid #cdd1c4;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: black;
+}
+
+.inactiveTab:first-child {
+  border-right: 1.5px solid #cdd1c4;
+}
+.inactiveTab:nth-child(2) {
+  border-left: 1.5px solid #cdd1c4;
 }
 
 .inactiveTab:hover {
-  background-color: #30323d;
-  border-bottom: 2px solid #cdd1c4;
-  background-color: #30323d;
-  color: #fab801;
+  background-color: #c79301;
+  border-bottom: 1.5px solid #cdd1c4;
 }
 
 .activePanel {
@@ -296,8 +303,10 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="text"] {
   width: 50%;
   color: white;
-  background: #30323d;
-  border: 1px solid #30323d;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  border-bottom: 2px solid #fab801;
 }
 
 input [type="file"] {
@@ -336,6 +345,7 @@ input[type="file"] {
 }
 .custom-file-upload {
   display: inline-block;
+  font-weight: 600;
 
   color: black;
   padding: 0.5em;
@@ -393,4 +403,15 @@ input[type="file"] {
 
 table {
   margin-right: 10px;
+}
+
+table td:first-child {
+  white-space: nowrap;
+}
+table td:last-child {
+  white-space: nowrap;
+}
+
+table td:nth-child(2) {
+  width: 99%;
 }
