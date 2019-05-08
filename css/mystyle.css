@@ -43,9 +43,17 @@ body {
   margin: 0;
   position: absolute;
   top: 47%;
-  left: 40%;
+
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
+}
+
+.left-dots {
+  left: 40%;
+}
+
+.right-dots {
+  right: 40%;
 }
 
 #audioCuttingWindow {
@@ -97,21 +105,18 @@ body {
   z-index: 1500;
 }
 
-.center {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: auto;
+.center-hor {
+  float: none;
+  margin: 0 auto;
 }
+
 .overlay-box {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
-  background: #30323d;
+  background: rgb(58, 58, 48);
   border: 1px solid #fab801;
 
   z-index: 1000;
@@ -194,6 +199,10 @@ canvas {
 
 #colorWaveForm {
   background: red;
+  padding: 3px;
+
+  border-radius: 4px;
+  height: 19px;
 }
 
 footer {
@@ -225,6 +234,12 @@ a:hover {
 }
 
 .tab {
+  font-weight: 600;
+
+  text-transform: uppercase;
+  letter-spacing: 0.4em;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
   cursor: pointer;
   float: left;
 
@@ -233,8 +248,9 @@ a:hover {
   overflow: hidden;
   padding: 0.625em;
   white-space: nowrap;
-
+  text-align: center;
   width: 50%;
+  margin-top: 10px;
 }
 
 .activeTab {
@@ -251,9 +267,11 @@ a:hover {
 
 .inactiveTab:first-child {
   border-right: 1.5px solid #cdd1c4;
+  border-bottom-right-radius: 4px;
 }
 .inactiveTab:nth-child(2) {
   border-left: 1.5px solid #cdd1c4;
+  border-bottom-left-radius: 4px;
 }
 
 .inactiveTab:hover {

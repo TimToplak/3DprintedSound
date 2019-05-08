@@ -69,33 +69,27 @@
           </div>
 
           <div id="audio2DControls">
-            <div class="row">
-              <div class="col-md-6 offset-md-3">
-                <table>
-                  <tr>
-                    <td>
-                      Smoothing:
-                    </td>
-                    <td>
-                      <div class="slidecontainer">
-                        <input
-                          id="smoothingRange"
-                          type="range"
-                          min="0"
-                          max="10"
-                          value="4"
-                          step="0.1"
-                          class="slider"
-                        />
-                      </div>
-                    </td>
-                    <td>
-                      <input type="number" id="smoothing" value="4" /><br />
-                    </td>
-                  </tr>
-                </table>
-              </div>
-            </div>
+            <table width="300px">
+              <tr>
+                <td>
+                  Smoothing:
+                </td>
+                <td>
+                  <div class="slidecontainer">
+                    <input
+                      id="smoothingRange"
+                      type="range"
+                      min="0"
+                      max="10"
+                      value="4"
+                      step="0.1"
+                      class="slider"
+                    />
+                  </div>
+                </td>
+                <td><input type="number" id="smoothing" value="4" /><br /></td>
+              </tr>
+            </table>
 
             <div>
               <span id="startTimeSpan">00:00</span>
@@ -104,7 +98,7 @@
 
             <div id="audioCuttingWindow">
               <div id="leftAudioCutter">
-                <div class="vertical-center">
+                <div class="vertical-center left-dots">
                   <div>
                     <div class="dot"></div>
                   </div>
@@ -117,7 +111,7 @@
                 </div>
               </div>
               <div id="rightAudioCutter">
-                <div class="vertical-center">
+                <div class="vertical-center right-dots">
                   <div>
                     <div class="dot"></div>
                   </div>
@@ -253,13 +247,15 @@
                     <input id="heightScale" type="number" value="50" />
                   </td>
                 </tr>
+                <tr>
+                  <td>
+                    Color of model:
+                  </td>
+                  <td>
+                    <div id="colorWaveForm"></div>
+                  </td>
+                </tr>
               </table>
-
-              <br />
-
-              <div style="width: 90px" id="colorWaveForm">
-                Color of model
-              </div>
             </div>
 
             <div id="tabstrip">
@@ -627,12 +623,14 @@
         <div class="col">
           <h4>About</h4>
           <p>
-            Project is open source, code is under MIT license, so feel free to
-            use it how ever you like.
             <b>
               Website 3D generation of waveform run on client, we do NOT collect
               any of your recorded sounds.</b
             >
+            <br />
+            <br />
+            Project is open source, code is under MIT license, so feel free to
+            use it how ever you like.
 
             <br />
             Are you looking for simple stand base, you can download it here:
