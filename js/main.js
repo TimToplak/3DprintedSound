@@ -232,20 +232,19 @@ async function addFlat3DWaveForm(values, step, heightScale, offset) {
   }
   var extrudeSettings = {
     depth: depth,
-    bevelEnabled: false
-    //bevelSegments: 2,
-    //steps: 2,
-    //bevelSize: 1,
-    //bevelThickness: 1
+    bevelEnabled: false,
+    bevelSegments: 2,
+    steps: 3,
+    bevelSize: 1,
+    bevelThickness: 1
   };
   var pointsShape = new THREE.Shape(points);
-  var geometry = new THREE.ExtrudeBufferGeometry(pointsShape, extrudeSettings);
+  var geometry = new THREE.ExtrudeGeometry(pointsShape, extrudeSettings);
 
   //work around, so that THREEBSP works
-  var normal_geometry = new THREE.Geometry().fromBufferGeometry(geometry);
+  //var normal_geometry = new THREE.Geometry().fromBufferGeometry(geometry);
 
-  var mesh = new THREE.Mesh(normal_geometry, g_material);
-
+  var mesh = new THREE.Mesh(geometry, g_material);
   return mesh;
 }
 
@@ -654,94 +653,88 @@ vizualizeCutWindow.addEventListener("click", function() {
   );
 });
 
-dragElement(leftAudioCutter);
-dragElement(rightAudioCutter);
+//dragElement(leftAudioCutter);
+//dragElement(rightAudioCutter);
 
-function dragElement(elmnt) {
-  var pos1 = 0,
-    pos2 = 0,
-    pos3 = 0,
-    pos4 = 0;
+interact(".draggable").draggable({
+  // enable inertial throwing
+  inertia: true,
+  // keep the element within the area of it's parent
 
-  elmnt.onmousedown = dragMouseDown;
+  // call this function on every dragmove event
+  onmove: dragMoveListener,
+  // call this function on every dragend event
+  onend: function(event) {}
+});
 
-  function dragMouseDown(e) {
-    e = e || window.event;
-    e.preventDefault();
-    // get the mouse cursor position at startup:
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    // call a function whenever the cursor moves:
-    document.onmousemove = elementDrag;
+function dragMoveListener(event) {
+  var elmnt = event.target,
+    // keep the dragged position in the data-x/data-y attributes
+    x = (parseFloat(elmnt.getAttribute("data-x")) || 0) + event.dx;
+
+  // translate the element
+
+  if (elmnt.id == "leftAudioCutter") {
+    elmnt.style.left = x + "px";
+
+    // update the posiion attributes
+    elmnt.setAttribute("data-x", x);
+
+    if (elmnt.offsetLeft < 0) {
+      // preventing left cutter leaving screen
+      elmnt.style.left = 0 + "px";
+    }
+
+    if (elmnt.offsetLeft + 18 >= rightAudioCutter.offsetLeft) {
+      //preventing crossing
+      elmnt.style.left = rightAudioCutter.offsetLeft - 18 + "px";
+    }
+    //resize cut window to fit between cutters
+    cutWindow.style.left = elmnt.offsetLeft + 18 + "px";
+    cutWindow.style.width =
+      cutWindowStartWidth -
+      elmnt.offsetLeft -
+      (cutWindowStartWidth - rightAudioCutter.offsetLeft) -
+      18 +
+      "px";
+    normalizedLeftCutterPosition =
+      leftAudioCutter.offsetLeft / audioCuttingWindow.offsetWidth;
+    startAudioTime =
+      startAudioTimeTemp + audioDuration * normalizedLeftCutterPosition;
   }
 
-  function elementDrag(e) {
-    e = e || window.event;
-    e.preventDefault();
-    // calculate the new cursor position:
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    // set the element's new position:
-    //elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-    if (elmnt.offsetLeft - pos1 < 0) {
-      elmnt.style.left = "0px";
-    } else {
-      elmnt.style.left = elmnt.offsetLeft - pos1 + "px";
+  if (elmnt.id == "rightAudioCutter") {
+    elmnt.style.left = audioCuttingWindow.offsetWidth - 18 + x + "px";
+
+    // update the posiion attributes
+    elmnt.setAttribute("data-x", x);
+
+    if (elmnt.offsetLeft - 18 <= leftAudioCutter.offsetLeft) {
+      elmnt.style.left = leftAudioCutter.offsetLeft + 18 + "px";
     }
 
-    if (elmnt.id == "leftAudioCutter") {
-      if (elmnt.offsetLeft + 18 >= rightAudioCutter.offsetLeft) {
-        //preventing crossing
-        elmnt.style.left = rightAudioCutter.offsetLeft - 18 + "px";
-      }
-      //resize cut window to fit between cutters
-      cutWindow.style.left = elmnt.offsetLeft + 18 + "px";
-      cutWindow.style.width =
-        cutWindowStartWidth -
-        elmnt.offsetLeft -
-        (cutWindowStartWidth - rightAudioCutter.offsetLeft) -
-        18 +
-        "px";
-      normalizedLeftCutterPosition =
-        leftAudioCutter.offsetLeft / audioCuttingWindow.offsetWidth;
-      startAudioTime =
-        startAudioTimeTemp + audioDuration * normalizedLeftCutterPosition;
+    if (elmnt.offsetLeft >= audioCuttingWindow.offsetWidth - 18) {
+      // preventing right cutter leaving screen
+      elmnt.style.left = audioCuttingWindow.offsetWidth - 18 + "px";
     }
-
-    if (elmnt.id == "rightAudioCutter") {
-      if (elmnt.offsetLeft - 18 <= leftAudioCutter.offsetLeft) {
-        elmnt.style.left = leftAudioCutter.offsetLeft + 18 + "px";
-      }
-
-      if (elmnt.offsetLeft >= audioCuttingWindow.offsetWidth - 18) {
-        // preventing right cutter leaving screen
-        elmnt.style.left = audioCuttingWindow.offsetWidth - 18 + "px";
-      }
-      //resize cut window to fit between cutters
-      cutWindow.style.width =
-        cutWindowStartWidth -
-        (cutWindowStartWidth - elmnt.offsetLeft) -
-        leftAudioCutter.offsetLeft -
-        18 +
-        "px";
-      normalizedRightCutterPosition =
-        (rightAudioCutter.offsetLeft - 18) /
-        (audioCuttingWindow.offsetWidth - 36);
-      endAudioTime =
-        endAudioTimeTemp -
-        (audioDuration - audioDuration * normalizedRightCutterPosition);
-    }
-  }
-
-  function closeDragElement() {
-    /* stop moving when mouse button is released:*/
-    document.onmouseup = null;
-    document.onmousemove = null;
+    //resize cut window to fit between cutters
+    cutWindow.style.width =
+      cutWindowStartWidth -
+      (cutWindowStartWidth - elmnt.offsetLeft) -
+      leftAudioCutter.offsetLeft -
+      18 +
+      "px";
+    normalizedRightCutterPosition =
+      (rightAudioCutter.offsetLeft - 18) /
+      (audioCuttingWindow.offsetWidth - 36);
+    endAudioTime =
+      endAudioTimeTemp -
+      (audioDuration - audioDuration * normalizedRightCutterPosition);
   }
 }
+
+// this is used later in the resizing demo
+window.dragMoveListener = dragMoveListener;
 
 //COLOR PICKER
 var g_material;

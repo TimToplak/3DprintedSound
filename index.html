@@ -50,7 +50,7 @@
           <div class="row">
             <div class="col">
               <div class="soundChoseContent floatright">
-                <b> Record sound from michrophone:</b><br />
+                <b> Record sound from microphone:</b><br />
 
                 <button id="record">Record</button>
                 <button id="stop">Stop</button>
@@ -97,7 +97,7 @@
             </div>
 
             <div id="audioCuttingWindow">
-              <div id="leftAudioCutter">
+              <div id="leftAudioCutter" class="draggable">
                 <div class="vertical-center left-dots">
                   <div>
                     <div class="dot"></div>
@@ -110,7 +110,7 @@
                   </div>
                 </div>
               </div>
-              <div id="rightAudioCutter">
+              <div id="rightAudioCutter" class="draggable">
                 <div class="vertical-center right-dots">
                   <div>
                     <div class="dot"></div>
@@ -546,7 +546,7 @@
                 </tr>
               </table>
             </div>
-            <button onclick="exportBinary()">download .svg</button>
+            <button onclick="exportBinary()">download .stl</button>
           </div>
         </div>
       </div>
@@ -671,6 +671,7 @@
     <script src="js/lib/ThreeCSG.js"></script>
     <script src="js/lib/STLLoader.js"></script>
     <script src="https://unpkg.com/vanilla-picker@2"></script>
+    <script src="js/lib/interact.min.js"></script>
 
     <script src="js/main.js"></script>
   </body>
