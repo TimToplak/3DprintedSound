@@ -35,7 +35,7 @@ var gridHelper = new THREE.GridHelper(4000, 80, 0x0000ff, 0x808080);
 gridHelper.position.y = -10;
 scene.add(gridHelper);
 
-controls = new THREE.OrbitControls(camera, renderer.domElement);
+var controls = new THREE.OrbitControls(camera, renderer.domElement);
 /*
 controls.enabled = false;
 
@@ -59,6 +59,270 @@ controls.maxDistance = 500;
 camera.position.set(-30, 35, 80);
 controls.update();
 controls.target.set(10, 0, 0);
+
+async function addFlat3DWaveFormBuffer(values, step, heightScale, offset) {
+  var depth = Number(document.getElementById("flatDepth").value);
+  var side;
+  var radios = document.getElementsByName("side");
+  for (var i = 0, length = radios.length; i < length; i++) {
+    if (radios[i].checked) {
+      side = radios[i].value;
+      break;
+    }
+  }
+  var geometry = new THREE.BufferGeometry();
+
+  var positions = [];
+  /*
+  positions.push(0, 0, 0);
+  positions.push(0, values[0] * heightScale + offset, depth);
+  positions.push(0, values[0] * heightScale + offset, 0);
+
+  positions.push(0, 0, 0);
+  positions.push(0, 0, depth);
+  positions.push(0, values[0] * heightScale + offset, depth);
+
+  for (var i = 0; i < values.length - 1; i++) {
+    //back
+    positions.push(i * step, 0, 0);
+    positions.push(i * step, values[i] * heightScale + offset, 0);
+    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+
+    positions.push(i * step, 0, 0);
+    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+    positions.push((i + 1) * step, 0, 0);
+
+    //front
+    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, depth);
+    positions.push(i * step, values[i] * heightScale + offset, depth);
+    positions.push(i * step, 0, depth);
+
+    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, depth);
+    positions.push(i * step, 0, depth);
+    positions.push((i + 1) * step, 0, depth);
+
+    //top
+    positions.push(i * step, values[i] * heightScale + offset, 0);
+    positions.push(i * step, values[i] * heightScale + offset, depth);
+    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+
+    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+    positions.push(i * step, values[i] * heightScale + offset, depth);
+    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, depth);
+
+    //bottom
+    positions.push(i * step, 0, depth);
+    positions.push(i * step, 0, 0);
+    positions.push((i + 1) * step, 0, 0);
+
+    positions.push(i * step, 0, depth);
+    positions.push((i + 1) * step, 0, 0);
+    positions.push((i + 1) * step, 0, depth);
+  }
+
+  positions.push((values.length - 1) * step, 0, 0);
+  positions.push(
+    (values.length - 1) * step,
+    values[values.length - 1] * heightScale + offset,
+    0
+  );
+  positions.push(
+    (values.length - 1) * step,
+    values[values.length - 1] * heightScale + offset,
+    depth
+  );
+
+  positions.push((values.length - 1) * step, 0, 0);
+  positions.push(
+    (values.length - 1) * step,
+    values[values.length - 1] * heightScale + offset,
+    depth
+  );
+  positions.push((values.length - 1) * step, 0, depth);
+  */
+
+  //Up
+  positions.push(0, 0, 0);
+  positions.push(0, values[0] * heightScale + offset, depth);
+  positions.push(0, values[0] * heightScale + offset, 0);
+
+  positions.push(0, 0, 0);
+  positions.push(0, 0, depth);
+  positions.push(0, values[0] * heightScale + offset, depth);
+  //Down
+  positions.push(0, 0, 0);
+  positions.push(0, -values[0] * heightScale - offset, 0);
+  positions.push(0, -values[0] * heightScale - offset, depth);
+
+  positions.push(0, 0, 0);
+  positions.push(0, -values[0] * heightScale - offset, depth);
+  positions.push(0, 0, depth);
+
+  for (var i = 0; i < values.length - 1; i++) {
+    //back
+    positions.push(i * step, 0, 0);
+    positions.push(i * step, values[i] * heightScale + offset, 0);
+    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+
+    positions.push(i * step, 0, 0);
+    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+    positions.push((i + 1) * step, 0, 0);
+
+    //back down
+    positions.push(i * step, 0, 0);
+    positions.push((i + 1) * step, -values[i + 1] * heightScale - offset, 0);
+    positions.push(i * step, -values[i] * heightScale - offset, 0);
+
+    positions.push(i * step, 0, 0);
+    positions.push((i + 1) * step, 0, 0);
+    positions.push((i + 1) * step, -values[i + 1] * heightScale - offset, 0);
+
+    //front
+    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, depth);
+    positions.push(i * step, values[i] * heightScale + offset, depth);
+    positions.push(i * step, 0, depth);
+
+    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, depth);
+    positions.push(i * step, 0, depth);
+    positions.push((i + 1) * step, 0, depth);
+
+    //front down
+    positions.push(
+      (i + 1) * step,
+      -values[i + 1] * heightScale - offset,
+      depth
+    );
+    positions.push(i * step, 0, depth);
+    positions.push(i * step, -values[i] * heightScale - offset, depth);
+
+    positions.push(
+      (i + 1) * step,
+      -values[i + 1] * heightScale - offset,
+      depth
+    );
+    positions.push((i + 1) * step, 0, depth);
+    positions.push(i * step, 0, depth);
+
+    //top
+    positions.push(i * step, values[i] * heightScale + offset, 0);
+    positions.push(i * step, values[i] * heightScale + offset, depth);
+    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+
+    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+    positions.push(i * step, values[i] * heightScale + offset, depth);
+    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, depth);
+
+    //top down
+    positions.push(i * step, -values[i] * heightScale - offset, 0);
+    positions.push((i + 1) * step, -values[i + 1] * heightScale - offset, 0);
+    positions.push(i * step, -values[i] * heightScale - offset, depth);
+
+    positions.push((i + 1) * step, -values[i + 1] * heightScale - offset, 0);
+    positions.push(
+      (i + 1) * step,
+      -values[i + 1] * heightScale - offset,
+      depth
+    );
+    positions.push(i * step, -values[i] * heightScale - offset, depth);
+  }
+
+  //up
+  positions.push((values.length - 1) * step, 0, 0);
+  positions.push(
+    (values.length - 1) * step,
+    values[values.length - 1] * heightScale + offset,
+    0
+  );
+  positions.push(
+    (values.length - 1) * step,
+    values[values.length - 1] * heightScale + offset,
+    depth
+  );
+
+  positions.push((values.length - 1) * step, 0, 0);
+  positions.push(
+    (values.length - 1) * step,
+    values[values.length - 1] * heightScale + offset,
+    depth
+  );
+  positions.push((values.length - 1) * step, 0, depth);
+
+  //down
+  positions.push((values.length - 1) * step, 0, 0);
+  positions.push(
+    (values.length - 1) * step,
+    -values[values.length - 1] * heightScale - offset,
+    depth
+  );
+  positions.push(
+    (values.length - 1) * step,
+    -values[values.length - 1] * heightScale - offset,
+    0
+  );
+
+  positions.push((values.length - 1) * step, 0, 0);
+  positions.push((values.length - 1) * step, 0, depth);
+  positions.push(
+    (values.length - 1) * step,
+    -values[values.length - 1] * heightScale - offset,
+    depth
+  );
+  // itemSize = 3 because there are 3 values (components) per vertex
+  geometry.addAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(positions, 3)
+  );
+
+  geometry.computeVertexNormals();
+
+  var material = new THREE.MeshPhongMaterial({
+    color: new THREE.Color(0x00ff00),
+    shininess: 66,
+    opacity: 1,
+    transparent: true,
+    side: THREE.DoubleSide
+  });
+
+  var geometry = new THREE.Geometry().fromBufferGeometry(geometry);
+  geometry.mergeVertices();
+  assignUVs(geometry);
+  var mesh = new THREE.Mesh(geometry, material);
+
+  return mesh;
+}
+
+function doCSG(a, b, op, mat) {
+  var bspA = CSG.fromMesh(a);
+  var bspB = CSG.fromMesh(b);
+  var bspC = bspA[op](bspB);
+  var result = CSG.toMesh(bspC, a.matrix);
+  result.material = mat;
+  result.castShadow = result.receiveShadow = true;
+  return result;
+}
+
+function assignUVs(geometry) {
+  geometry.faceVertexUvs[0] = [];
+
+  geometry.faces.forEach(function(face) {
+    var uvs = [];
+    var ids = ["a", "b", "c"];
+    for (var i = 0; i < ids.length; i++) {
+      var vertex = geometry.vertices[face[ids[i]]].clone();
+
+      var n = vertex.normalize();
+      var yaw = 0.5 - Math.atan(n.z, -n.x) / (2.0 * Math.PI);
+      var pitch = 0.5 - Math.asin(n.y) / Math.PI;
+
+      var u = yaw,
+        v = pitch;
+      uvs.push(new THREE.Vector2(u, v));
+    }
+    geometry.faceVertexUvs[0].push(uvs);
+  });
+
+  geometry.uvsNeedUpdate = true;
+}
 
 function animate() {
   requestAnimationFrame(animate);
@@ -98,7 +362,12 @@ async function add3DWaveformFromData(values) {
 
   var waveFormMesh;
   if (waveFormType == "flat") {
-    waveFormMesh = await addFlat3DWaveForm(values, step, heightScale, offset);
+    waveFormMesh = await addFlat3DWaveFormBuffer(
+      values,
+      step,
+      heightScale,
+      offset
+    );
   } else {
     waveFormMesh = await addCircle3DWaveForm(values, step, heightScale, offset);
   }
@@ -136,6 +405,22 @@ async function add3DWaveformFromData(values) {
     waveFormMesh = await loadStand(waveFormMesh);
   }
   document.getElementById("loadingScreen").style.display = "none";
+
+  var modifier = new ModifierStack(waveFormMesh);
+  var bend = new Bend(2, 0, 0);
+  modifier.addModifier(bend);
+  modifier.apply();
+
+  var edges = new THREE.EdgesGeometry(waveFormMesh.geometry);
+  var line = new THREE.LineSegments(
+    edges,
+    new THREE.LineBasicMaterial({ color: 0xffffff })
+  );
+
+  var helper = new THREE.FaceNormalsHelper(waveFormMesh, 2, 0x00ff00, 1);
+  //scene.add(helper);
+  //scene.add(line);
+
   updateMesh(waveFormMesh);
 }
 
@@ -279,7 +564,7 @@ async function addText(mesh, textLocal, depth, textSize, type, x, y, z) {
   } else {
     var subtract_bsp = mesh_bsp.union(text_bsp);
   }
-  result = subtract_bsp.toMesh(g_material);
+  var result = subtract_bsp.toMesh(g_material);
   //result.geometry.computeVertexNormals();
 
   return result;
@@ -471,14 +756,14 @@ function getWaveformData(
       .getChannelData(1)
       .slice(tempLeftAudioCutIndex, tempRightAudioCutIndex);
   }
-  const values = new Float32Array(dataPoints);
+  const values = [];
   const dataWindow = Math.round(leftChannel.length / dataPoints);
   for (let i = 0, y = 0, buffer = []; i < leftChannel.length; i++) {
     const summedValue =
       (Math.abs(leftChannel[i]) + Math.abs(rightChannel[i])) / 2;
     buffer.push(summedValue);
     if (buffer.length === dataWindow) {
-      values[y++] = avg(buffer);
+      values.push(avg(buffer));
       buffer = [];
     }
   }
@@ -565,7 +850,7 @@ function updateAudioPosition() {
 }
 
 function formatTime(seconds) {
-  minutes = Math.floor(seconds / 60);
+  var minutes = Math.floor(seconds / 60);
   minutes = minutes >= 10 ? minutes : "0" + minutes;
   seconds = Math.floor(seconds % 60);
   seconds = seconds >= 10 ? seconds : "0" + seconds;
@@ -590,7 +875,6 @@ function processTrack(buffer) {
 
 function proccesBlob(blob) {
   const reader = new FileReader();
-  currentBlob = blob;
   reader.readAsArrayBuffer(blob);
   reader.onload = e => processTrack(e.target.result);
   attachToAudio(blob);
@@ -610,6 +894,7 @@ var cutWindowStartWidth = audioCuttingWindow.offsetWidth - 40;
 var SVG2DWaveform = document.getElementById("SVG2DWaveform");
 
 window.addEventListener("resize", function(event) {
+  console.log(event);
   cutWindow.style.width =
     cutWindowStartWidth -
     (cutWindowStartWidth - rightAudioCutter.offsetLeft) -
@@ -657,14 +942,7 @@ vizualizeCutWindow.addEventListener("click", function() {
 //dragElement(rightAudioCutter);
 
 interact(".draggable").draggable({
-  // enable inertial throwing
-  inertia: true,
-  // keep the element within the area of it's parent
-
-  // call this function on every dragmove event
-  onmove: dragMoveListener,
-  // call this function on every dragend event
-  onend: function(event) {}
+  onmove: dragMoveListener
 });
 
 function dragMoveListener(event) {
