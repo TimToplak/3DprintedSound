@@ -1,3 +1,15 @@
+/*
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 !(function(t, e) {
   if ("object" == typeof exports && "object" == typeof module)
     module.exports = e();
@@ -1021,17 +1033,21 @@
         s = i(14),
         c = i(17),
         u = (function(t) {
-          function e(e, i, n) {
+          function e(e, i, n, m_n, m_d, m_x) {
             void 0 === e && (e = 0),
               void 0 === i && (i = 0.5),
               void 0 === n && (n = 0);
             var r = t.call(this) || this;
+
             return (
               (r._constraint = o.ModConstant.NONE),
               (r.switchAxes = !1),
               (r._force = e),
               (r._offset = i),
               (r.angle = n),
+              (r.m_n = m_n),
+              (r.m_d = m_d),
+              (r.m_x = m_x),
               r
             );
           }
@@ -1039,9 +1055,9 @@
             n(e, t),
             (e.prototype.setModifiable = function(e) {
               t.prototype.setModifiable.call(this, e),
-                (this.max = this.switchAxes ? e.midAxis : e.maxAxis),
-                (this.min = e.minAxis),
-                (this.mid = this.switchAxes ? e.maxAxis : e.midAxis),
+                (this.max = this.m_x), //this.switchAxes ? e.midAxis : e.maxAxis),
+                (this.min = this.m_n), //e.minAxis),
+                (this.mid = this.m_d), //this.switchAxes ? e.maxAxis : e.midAxis),
                 (this.width = e.getSize(this.max)),
                 (this.height = e.getSize(this.mid)),
                 (this.origin = e.getMin(this.max)),
