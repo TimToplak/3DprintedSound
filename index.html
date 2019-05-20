@@ -314,239 +314,343 @@
             <hr class="line" align="left" />
 
             <div class="controls">
-              <input type="checkbox" id="addTextFlat" /> add text
+              <input
+                type="checkbox"
+                id="addTextFlat"
+                onclick="expand('expandableText')"
+              />
+              add text
+              <div class="expandable" id="expandableText">
+                <input type="text" id="textFlat" value="text here" />
+                <br />
+                <input type="checkbox" id="addFontFromFile" /> font from file:
 
-              <br />
-              <input type="text" id="textFlat" value="text here" />
-              <br />
-              <input type="checkbox" id="addFontFromFile" /> font from file:
+                <label for="fontFile" class="custom-file-upload">
+                  <i class="fa fa-cloud-upload"></i> Choose
+                </label>
 
-              <label for="fontFile" class="custom-file-upload">
-                <i class="fa fa-cloud-upload"></i> Choose
-              </label>
-
-              <input type="file" id="fontFile" accept=".json" />
-              <br />
-              Type:
-              <div class="controls">
-                <input type="radio" name="textTypeFlat" value="subtract" />
-                Subtract<br />
-                <input type="radio" name="textTypeFlat" checked value="union" />
-                Union<br />
+                <input type="file" id="fontFile" accept=".json" />
+                <br />
+                Type:
+                <div class="controls">
+                  <input type="radio" name="textTypeFlat" value="subtract" />
+                  Subtract<br />
+                  <input
+                    type="radio"
+                    name="textTypeFlat"
+                    checked
+                    value="union"
+                  />
+                  Union<br />
+                </div>
+                <table>
+                  <tr>
+                    <td>
+                      Text depth:
+                    </td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="0"
+                          max="50"
+                          value="8"
+                          class="slider"
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <input type="number" id="textDepth" value="8" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Text size:
+                    </td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="1"
+                          max="50"
+                          value="10"
+                          class="slider"
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <input type="number" id="textSize" value="10" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Move text:
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="float:right"><span class="xspan">X</span>:</td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="-500"
+                          max="500"
+                          value="0"
+                          class="slider"
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <input id="flatXtext" type="number" value="0" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="float:right"><span class="yspan">Y</span>:</td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="-500"
+                          max="500"
+                          value="0"
+                          class="slider"
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <input id="flatYtext" type="number" value="0" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="float:right"><span class="zspan"> Z</span>:</td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="-500"
+                          max="500"
+                          value="0"
+                          class="slider"
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <input id="flatZtext" type="number" value="0" />
+                    </td>
+                  </tr>
+                </table>
               </div>
-              <table>
-                <tr>
-                  <td>
-                    Text depth:
-                  </td>
-                  <td>
-                    <div class="slidecontainer">
-                      <input
-                        type="range"
-                        min="0"
-                        max="50"
-                        value="8"
-                        class="slider"
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <input type="number" id="textDepth" value="8" />
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    Text size:
-                  </td>
-                  <td>
-                    <div class="slidecontainer">
-                      <input
-                        type="range"
-                        min="1"
-                        max="50"
-                        value="10"
-                        class="slider"
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <input type="number" id="textSize" value="10" />
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    Move text:
-                  </td>
-                </tr>
-                <tr>
-                  <td style="float:right"><span class="xspan">X</span>:</td>
-                  <td>
-                    <div class="slidecontainer">
-                      <input
-                        type="range"
-                        min="-500"
-                        max="500"
-                        value="0"
-                        class="slider"
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <input id="flatXtext" type="number" value="0" />
-                  </td>
-                </tr>
-                <tr>
-                  <td style="float:right"><span class="yspan">Y</span>:</td>
-                  <td>
-                    <div class="slidecontainer">
-                      <input
-                        type="range"
-                        min="-500"
-                        max="500"
-                        value="0"
-                        class="slider"
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <input id="flatYtext" type="number" value="0" />
-                  </td>
-                </tr>
-                <tr>
-                  <td style="float:right"><span class="zspan"> Z</span>:</td>
-                  <td>
-                    <div class="slidecontainer">
-                      <input
-                        type="range"
-                        min="-500"
-                        max="500"
-                        value="0"
-                        class="slider"
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <input id="flatZtext" type="number" value="0" />
-                  </td>
-                </tr>
-              </table>
             </div>
             <hr class="line" align="left" />
             <div class="controls">
-              <input type="checkbox" id="addStand" /> add stand/hole <br />
-              Type:
-              <br />
-              <div class="controls">
-                <input
-                  type="radio"
-                  name="radiosCylinderType"
-                  value="subtract"
-                />
-                Subtract<br />
-                <input
-                  type="radio"
-                  name="radiosCylinderType"
-                  checked
-                  value="union"
-                />
-                Union
+              <input
+                type="checkbox"
+                id="addStand"
+                onclick="expand('expandableStand')"
+              />
+              add stand/hole <br />
+
+              <div class="expandable" id="expandableStand">
+                Type:
+                <div class="controls">
+                  <input
+                    type="radio"
+                    name="radiosCylinderType"
+                    value="subtract"
+                  />
+                  Subtract<br />
+                  <input
+                    type="radio"
+                    name="radiosCylinderType"
+                    checked
+                    value="union"
+                  />
+                  Union
+                </div>
+
+                <table>
+                  <tr>
+                    <td>
+                      Cylinder radius:
+                    </td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="0"
+                          max="50"
+                          value="2"
+                          class="slider"
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <input id="cylinderRadius" type="number" value="2" />
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>
+                      Clyinder height:
+                    </td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="0"
+                          max="50"
+                          value="5"
+                          class="slider"
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <input id="cylinderHeight" type="number" value="5" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Move stand/hole:
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="float:right"><span class="xspan">X</span>:</td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="-500"
+                          max="500"
+                          value="0"
+                          class="slider"
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <input id="cylinderX" type="number" value="0" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="float:right"><span class="yspan">Y</span>:</td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="-500"
+                          max="500"
+                          value="0"
+                          class="slider"
+                        />
+                      </div>
+                    </td>
+                    <td><input id="cylinderY" type="number" value="0" /></td>
+                  </tr>
+                  <tr>
+                    <td style="float:right"><span class="zspan"> Z</span>:</td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="-500"
+                          max="500"
+                          value="0"
+                          class="slider"
+                        />
+                      </div>
+                    </td>
+                    <td><input id="cylinderZ" type="number" value="0" /></td>
+                  </tr>
+                </table>
               </div>
-
-              <table>
-                <tr>
-                  <td>
-                    Cylinder radius:
-                  </td>
-                  <td>
-                    <div class="slidecontainer">
-                      <input
-                        type="range"
-                        min="0"
-                        max="50"
-                        value="2"
-                        class="slider"
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <input id="cylinderRadius" type="number" value="2" />
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>
-                    Clyinder height:
-                  </td>
-                  <td>
-                    <div class="slidecontainer">
-                      <input
-                        type="range"
-                        min="0"
-                        max="50"
-                        value="5"
-                        class="slider"
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <input id="cylinderHeight" type="number" value="5" />
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    Move stand/hole:
-                  </td>
-                </tr>
-                <tr>
-                  <td style="float:right"><span class="xspan">X</span>:</td>
-                  <td>
-                    <div class="slidecontainer">
-                      <input
-                        type="range"
-                        min="-500"
-                        max="500"
-                        value="0"
-                        class="slider"
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <input id="cylinderX" type="number" value="0" />
-                  </td>
-                </tr>
-                <tr>
-                  <td style="float:right"><span class="yspan">Y</span>:</td>
-                  <td>
-                    <div class="slidecontainer">
-                      <input
-                        type="range"
-                        min="-500"
-                        max="500"
-                        value="0"
-                        class="slider"
-                      />
-                    </div>
-                  </td>
-                  <td><input id="cylinderY" type="number" value="0" /></td>
-                </tr>
-                <tr>
-                  <td style="float:right"><span class="zspan"> Z</span>:</td>
-                  <td>
-                    <div class="slidecontainer">
-                      <input
-                        type="range"
-                        min="-500"
-                        max="500"
-                        value="0"
-                        class="slider"
-                      />
-                    </div>
-                  </td>
-                  <td><input id="cylinderZ" type="number" value="0" /></td>
-                </tr>
-              </table>
             </div>
-            <button onclick="exportBinary()">download .stl</button>
+            <hr class="line" align="left" />
+            <div class="controls">
+              <input
+                type="checkbox"
+                id="addBend"
+                onclick="expand('expandableBend')"
+              />
+              add bend modifier <br />
+
+              <div class="expandable" id="expandableBend">
+                Bend along axis:
+                <div class="controls">
+                  <input type="radio" name="radiosBendType" checked value="X" />
+                  X<br />
+                  <input type="radio" name="radiosBendType" value="Y" />
+                  Y<br />
+                  <input type="radio" name="radiosBendType" value="Z" />
+                  Z
+                </div>
+
+                <table>
+                  <tr>
+                    <td>
+                      Angle:
+                    </td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="0"
+                          max="2"
+                          value="2"
+                          class="slider"
+                          step="0.01"
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <input id="bendAngle" type="number" value="2" />
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>
+                      Offset:
+                    </td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          value="0"
+                          class="slider"
+                          step="0.01"
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <input id="bendOffset" type="number" value="0" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Twist:
+                    </td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="0"
+                          max="5"
+                          value="0"
+                          class="slider"
+                          step="0.01"
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <input id="bendTwist" type="number" value="0" />
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            <button id="downloadButton" onclick="exportBinary()">
+              download .stl
+            </button>
           </div>
         </div>
       </div>
@@ -611,6 +715,14 @@
               <ul>
                 <li><b>Cylinder radius:</b> radius of circle</li>
                 <li><b>Clyinder height:</b> height along Y axis</li>
+              </ul>
+            </li>
+            <li>
+              Bend:
+              <ul>
+                <li><b>Angle:</b> bend angle in &#x3C0, center of bending is always half of 3D waveform lenght</li>
+                <li><b>Offset:</b> offset when twisting begin</li>
+                <li><b>Twist:</b> twist 3D waveform along X axis</li>
               </ul>
             </li>
           </ul>

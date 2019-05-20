@@ -13,7 +13,7 @@ var camera = new THREE.PerspectiveCamera(
 
 var exporter = new THREE.STLExporter();
 
-var geometry = new THREE.PlaneGeometry(1400, 1400, 1400);
+var geometry = new THREE.PlaneGeometry(1400 * 3, 1400 * 3, 1400 * 3);
 var material = new THREE.MeshBasicMaterial({
   color: 0xfffff0,
   side: THREE.DoubleSide
@@ -21,7 +21,7 @@ var material = new THREE.MeshBasicMaterial({
 
 var plane = new THREE.Mesh(geometry, material);
 rotateObject(plane, 90);
-plane.position.set(0, -100, 0);
+plane.position.set(0, -500, 0);
 scene.add(plane);
 
 var axesHelper = new THREE.AxesHelper(20);
@@ -73,200 +73,224 @@ async function addFlat3DWaveFormBuffer(values, step, heightScale, offset) {
   var geometry = new THREE.BufferGeometry();
 
   var positions = [];
-  /*
-  positions.push(0, 0, 0);
-  positions.push(0, values[0] * heightScale + offset, depth);
-  positions.push(0, values[0] * heightScale + offset, 0);
+  if (side == "one") {
+    positions.push(0, 0, 0);
+    positions.push(0, values[0] * heightScale + offset, depth);
+    positions.push(0, values[0] * heightScale + offset, 0);
 
-  positions.push(0, 0, 0);
-  positions.push(0, 0, depth);
-  positions.push(0, values[0] * heightScale + offset, depth);
+    positions.push(0, 0, 0);
+    positions.push(0, 0, depth);
+    positions.push(0, values[0] * heightScale + offset, depth);
 
-  for (var i = 0; i < values.length - 1; i++) {
-    //back
-    positions.push(i * step, 0, 0);
-    positions.push(i * step, values[i] * heightScale + offset, 0);
-    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+    for (var i = 0; i < values.length - 1; i++) {
+      //back
+      positions.push(i * step, 0, 0);
+      positions.push(i * step, values[i] * heightScale + offset, 0);
+      positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
 
-    positions.push(i * step, 0, 0);
-    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
-    positions.push((i + 1) * step, 0, 0);
+      positions.push(i * step, 0, 0);
+      positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+      positions.push((i + 1) * step, 0, 0);
 
-    //front
-    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, depth);
-    positions.push(i * step, values[i] * heightScale + offset, depth);
-    positions.push(i * step, 0, depth);
+      //front
+      positions.push(
+        (i + 1) * step,
+        values[i + 1] * heightScale + offset,
+        depth
+      );
+      positions.push(i * step, values[i] * heightScale + offset, depth);
+      positions.push(i * step, 0, depth);
 
-    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, depth);
-    positions.push(i * step, 0, depth);
-    positions.push((i + 1) * step, 0, depth);
+      positions.push(
+        (i + 1) * step,
+        values[i + 1] * heightScale + offset,
+        depth
+      );
+      positions.push(i * step, 0, depth);
+      positions.push((i + 1) * step, 0, depth);
 
-    //top
-    positions.push(i * step, values[i] * heightScale + offset, 0);
-    positions.push(i * step, values[i] * heightScale + offset, depth);
-    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+      //top
+      positions.push(i * step, values[i] * heightScale + offset, 0);
+      positions.push(i * step, values[i] * heightScale + offset, depth);
+      positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
 
-    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
-    positions.push(i * step, values[i] * heightScale + offset, depth);
-    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, depth);
+      positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+      positions.push(i * step, values[i] * heightScale + offset, depth);
+      positions.push(
+        (i + 1) * step,
+        values[i + 1] * heightScale + offset,
+        depth
+      );
 
-    //bottom
-    positions.push(i * step, 0, depth);
-    positions.push(i * step, 0, 0);
-    positions.push((i + 1) * step, 0, 0);
+      //bottom
+      positions.push(i * step, 0, depth);
+      positions.push(i * step, 0, 0);
+      positions.push((i + 1) * step, 0, 0);
 
-    positions.push(i * step, 0, depth);
-    positions.push((i + 1) * step, 0, 0);
-    positions.push((i + 1) * step, 0, depth);
+      positions.push(i * step, 0, depth);
+      positions.push((i + 1) * step, 0, 0);
+      positions.push((i + 1) * step, 0, depth);
+    }
+
+    positions.push((values.length - 1) * step, 0, 0);
+    positions.push(
+      (values.length - 1) * step,
+      values[values.length - 1] * heightScale + offset,
+      0
+    );
+    positions.push(
+      (values.length - 1) * step,
+      values[values.length - 1] * heightScale + offset,
+      depth
+    );
+
+    positions.push((values.length - 1) * step, 0, 0);
+    positions.push(
+      (values.length - 1) * step,
+      values[values.length - 1] * heightScale + offset,
+      depth
+    );
+    positions.push((values.length - 1) * step, 0, depth);
+  } else {
+    //Up
+    positions.push(0, 0, 0);
+    positions.push(0, values[0] * heightScale + offset, depth);
+    positions.push(0, values[0] * heightScale + offset, 0);
+
+    positions.push(0, 0, 0);
+    positions.push(0, 0, depth);
+    positions.push(0, values[0] * heightScale + offset, depth);
+    //Down
+    positions.push(0, 0, 0);
+    positions.push(0, -values[0] * heightScale - offset, 0);
+    positions.push(0, -values[0] * heightScale - offset, depth);
+
+    positions.push(0, 0, 0);
+    positions.push(0, -values[0] * heightScale - offset, depth);
+    positions.push(0, 0, depth);
+
+    for (var i = 0; i < values.length - 1; i++) {
+      //back
+      positions.push(i * step, 0, 0);
+      positions.push(i * step, values[i] * heightScale + offset, 0);
+      positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+
+      positions.push(i * step, 0, 0);
+      positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+      positions.push((i + 1) * step, 0, 0);
+
+      //back down
+      positions.push(i * step, 0, 0);
+      positions.push((i + 1) * step, -values[i + 1] * heightScale - offset, 0);
+      positions.push(i * step, -values[i] * heightScale - offset, 0);
+
+      positions.push(i * step, 0, 0);
+      positions.push((i + 1) * step, 0, 0);
+      positions.push((i + 1) * step, -values[i + 1] * heightScale - offset, 0);
+
+      //front
+      positions.push(
+        (i + 1) * step,
+        values[i + 1] * heightScale + offset,
+        depth
+      );
+      positions.push(i * step, values[i] * heightScale + offset, depth);
+      positions.push(i * step, 0, depth);
+
+      positions.push(
+        (i + 1) * step,
+        values[i + 1] * heightScale + offset,
+        depth
+      );
+      positions.push(i * step, 0, depth);
+      positions.push((i + 1) * step, 0, depth);
+
+      //front down
+      positions.push(
+        (i + 1) * step,
+        -values[i + 1] * heightScale - offset,
+        depth
+      );
+      positions.push(i * step, 0, depth);
+      positions.push(i * step, -values[i] * heightScale - offset, depth);
+
+      positions.push(
+        (i + 1) * step,
+        -values[i + 1] * heightScale - offset,
+        depth
+      );
+      positions.push((i + 1) * step, 0, depth);
+      positions.push(i * step, 0, depth);
+
+      //top
+      positions.push(i * step, values[i] * heightScale + offset, 0);
+      positions.push(i * step, values[i] * heightScale + offset, depth);
+      positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+
+      positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
+      positions.push(i * step, values[i] * heightScale + offset, depth);
+      positions.push(
+        (i + 1) * step,
+        values[i + 1] * heightScale + offset,
+        depth
+      );
+
+      //top down
+      positions.push(i * step, -values[i] * heightScale - offset, 0);
+      positions.push((i + 1) * step, -values[i + 1] * heightScale - offset, 0);
+      positions.push(i * step, -values[i] * heightScale - offset, depth);
+
+      positions.push((i + 1) * step, -values[i + 1] * heightScale - offset, 0);
+      positions.push(
+        (i + 1) * step,
+        -values[i + 1] * heightScale - offset,
+        depth
+      );
+      positions.push(i * step, -values[i] * heightScale - offset, depth);
+    }
+
+    //up
+    positions.push((values.length - 1) * step, 0, 0);
+    positions.push(
+      (values.length - 1) * step,
+      values[values.length - 1] * heightScale + offset,
+      0
+    );
+    positions.push(
+      (values.length - 1) * step,
+      values[values.length - 1] * heightScale + offset,
+      depth
+    );
+
+    positions.push((values.length - 1) * step, 0, 0);
+    positions.push(
+      (values.length - 1) * step,
+      values[values.length - 1] * heightScale + offset,
+      depth
+    );
+    positions.push((values.length - 1) * step, 0, depth);
+
+    //down
+    positions.push((values.length - 1) * step, 0, 0);
+    positions.push(
+      (values.length - 1) * step,
+      -values[values.length - 1] * heightScale - offset,
+      depth
+    );
+    positions.push(
+      (values.length - 1) * step,
+      -values[values.length - 1] * heightScale - offset,
+      0
+    );
+
+    positions.push((values.length - 1) * step, 0, 0);
+    positions.push((values.length - 1) * step, 0, depth);
+    positions.push(
+      (values.length - 1) * step,
+      -values[values.length - 1] * heightScale - offset,
+      depth
+    );
   }
-
-  positions.push((values.length - 1) * step, 0, 0);
-  positions.push(
-    (values.length - 1) * step,
-    values[values.length - 1] * heightScale + offset,
-    0
-  );
-  positions.push(
-    (values.length - 1) * step,
-    values[values.length - 1] * heightScale + offset,
-    depth
-  );
-
-  positions.push((values.length - 1) * step, 0, 0);
-  positions.push(
-    (values.length - 1) * step,
-    values[values.length - 1] * heightScale + offset,
-    depth
-  );
-  positions.push((values.length - 1) * step, 0, depth);
-  */
-
-  //Up
-  positions.push(0, 0, 0);
-  positions.push(0, values[0] * heightScale + offset, depth);
-  positions.push(0, values[0] * heightScale + offset, 0);
-
-  positions.push(0, 0, 0);
-  positions.push(0, 0, depth);
-  positions.push(0, values[0] * heightScale + offset, depth);
-  //Down
-  positions.push(0, 0, 0);
-  positions.push(0, -values[0] * heightScale - offset, 0);
-  positions.push(0, -values[0] * heightScale - offset, depth);
-
-  positions.push(0, 0, 0);
-  positions.push(0, -values[0] * heightScale - offset, depth);
-  positions.push(0, 0, depth);
-
-  for (var i = 0; i < values.length - 1; i++) {
-    //back
-    positions.push(i * step, 0, 0);
-    positions.push(i * step, values[i] * heightScale + offset, 0);
-    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
-
-    positions.push(i * step, 0, 0);
-    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
-    positions.push((i + 1) * step, 0, 0);
-
-    //back down
-    positions.push(i * step, 0, 0);
-    positions.push((i + 1) * step, -values[i + 1] * heightScale - offset, 0);
-    positions.push(i * step, -values[i] * heightScale - offset, 0);
-
-    positions.push(i * step, 0, 0);
-    positions.push((i + 1) * step, 0, 0);
-    positions.push((i + 1) * step, -values[i + 1] * heightScale - offset, 0);
-
-    //front
-    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, depth);
-    positions.push(i * step, values[i] * heightScale + offset, depth);
-    positions.push(i * step, 0, depth);
-
-    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, depth);
-    positions.push(i * step, 0, depth);
-    positions.push((i + 1) * step, 0, depth);
-
-    //front down
-    positions.push(
-      (i + 1) * step,
-      -values[i + 1] * heightScale - offset,
-      depth
-    );
-    positions.push(i * step, 0, depth);
-    positions.push(i * step, -values[i] * heightScale - offset, depth);
-
-    positions.push(
-      (i + 1) * step,
-      -values[i + 1] * heightScale - offset,
-      depth
-    );
-    positions.push((i + 1) * step, 0, depth);
-    positions.push(i * step, 0, depth);
-
-    //top
-    positions.push(i * step, values[i] * heightScale + offset, 0);
-    positions.push(i * step, values[i] * heightScale + offset, depth);
-    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
-
-    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, 0);
-    positions.push(i * step, values[i] * heightScale + offset, depth);
-    positions.push((i + 1) * step, values[i + 1] * heightScale + offset, depth);
-
-    //top down
-    positions.push(i * step, -values[i] * heightScale - offset, 0);
-    positions.push((i + 1) * step, -values[i + 1] * heightScale - offset, 0);
-    positions.push(i * step, -values[i] * heightScale - offset, depth);
-
-    positions.push((i + 1) * step, -values[i + 1] * heightScale - offset, 0);
-    positions.push(
-      (i + 1) * step,
-      -values[i + 1] * heightScale - offset,
-      depth
-    );
-    positions.push(i * step, -values[i] * heightScale - offset, depth);
-  }
-
-  //up
-  positions.push((values.length - 1) * step, 0, 0);
-  positions.push(
-    (values.length - 1) * step,
-    values[values.length - 1] * heightScale + offset,
-    0
-  );
-  positions.push(
-    (values.length - 1) * step,
-    values[values.length - 1] * heightScale + offset,
-    depth
-  );
-
-  positions.push((values.length - 1) * step, 0, 0);
-  positions.push(
-    (values.length - 1) * step,
-    values[values.length - 1] * heightScale + offset,
-    depth
-  );
-  positions.push((values.length - 1) * step, 0, depth);
-
-  //down
-  positions.push((values.length - 1) * step, 0, 0);
-  positions.push(
-    (values.length - 1) * step,
-    -values[values.length - 1] * heightScale - offset,
-    depth
-  );
-  positions.push(
-    (values.length - 1) * step,
-    -values[values.length - 1] * heightScale - offset,
-    0
-  );
-
-  positions.push((values.length - 1) * step, 0, 0);
-  positions.push((values.length - 1) * step, 0, depth);
-  positions.push(
-    (values.length - 1) * step,
-    -values[values.length - 1] * heightScale - offset,
-    depth
-  );
   // itemSize = 3 because there are 3 values (components) per vertex
   geometry.addAttribute(
     "position",
@@ -275,18 +299,10 @@ async function addFlat3DWaveFormBuffer(values, step, heightScale, offset) {
 
   geometry.computeVertexNormals();
 
-  var material = new THREE.MeshPhongMaterial({
-    color: new THREE.Color(0x00ff00),
-    shininess: 66,
-    opacity: 1,
-    transparent: true,
-    side: THREE.DoubleSide
-  });
-
   var geometry = new THREE.Geometry().fromBufferGeometry(geometry);
   geometry.mergeVertices();
   assignUVs(geometry);
-  var mesh = new THREE.Mesh(geometry, material);
+  var mesh = new THREE.Mesh(geometry, g_material);
 
   return mesh;
 }
@@ -406,22 +422,56 @@ async function add3DWaveformFromData(values) {
   }
   document.getElementById("loadingScreen").style.display = "none";
 
-  var modifier = new ModifierStack(waveFormMesh);
-  var bend = new Bend(2, 0, 0);
+  if (document.getElementById("addBend").checked) {
+    waveFormMesh = await addBend(waveFormMesh);
+  }
+
+  updateMesh(waveFormMesh);
+}
+
+async function addBend(mesh) {
+  var bendAngle = Number(document.getElementById("bendAngle").value);
+  var bendOffset = Number(document.getElementById("bendOffset").value);
+  var bendTwist = Number(document.getElementById("bendTwist").value);
+  var radiosBend = document.getElementsByName("radiosBendType");
+  var radiosBendType;
+  for (var i = 0, length = radiosBend.length; i < length; i++) {
+    if (radiosBend[i].checked) {
+      radiosBendType = radiosBend[i].value;
+      break;
+    }
+  }
+
+  var min;
+  var mid;
+  var max;
+  switch (radiosBendType) {
+    case "X":
+      min = 2;
+      mid = 4;
+      max = 1;
+      break;
+    case "Y":
+      min = 4;
+      mid = 1;
+      max = 2;
+      break;
+    case "Z":
+      min = 4;
+      mid = 2;
+      max = 1;
+      break;
+  }
+
+  var modifier = new ModifierStack(mesh);
+  var bend = new Bend(bendAngle, bendOffset, bendTwist, min, mid, max);
+  bend.switchAxes = true;
+  console.log(bend);
+
   modifier.addModifier(bend);
   modifier.apply();
 
-  var edges = new THREE.EdgesGeometry(waveFormMesh.geometry);
-  var line = new THREE.LineSegments(
-    edges,
-    new THREE.LineBasicMaterial({ color: 0xffffff })
-  );
-
-  var helper = new THREE.FaceNormalsHelper(waveFormMesh, 2, 0x00ff00, 1);
-  //scene.add(helper);
-  //scene.add(line);
-
-  updateMesh(waveFormMesh);
+  return mesh;
 }
 
 async function loadStand(waveMesh) {
@@ -1067,6 +1117,16 @@ currentTab = tabs[0];
 currentPanel = panels[0];
 currentTab.className = "tab activeTab";
 currentPanel.className = "activePanel";
+
+//EXPAND
+function expand(id) {
+  var expandable = document.getElementById(id);
+  if (expandable.style.display == "block") {
+    expandable.style.display = "none";
+  } else {
+    expandable.style.display = "block";
+  }
+}
 
 //DOWNLOAD .wav
 function audioBufferToWav(buffer, opt) {
