@@ -666,6 +666,7 @@ function save(blob, filename) {
 
 //AUDIO ANALZY
 const audio = document.createElement("audio");
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioContext = new window.AudioContext();
 const svg = document.querySelector("svg");
 const progress = svg.querySelector("#progress");
@@ -909,9 +910,9 @@ function formatTime(seconds) {
 
 function processTrack(buffer) {
   const source = audioContext.createBufferSource();
-  return audioContext
-    .decodeAudioData(buffer)
-    .then(audioBuffer => {
+  return audioContext.decodeAudioData(
+    buffer,
+    audioBuffer => {
       currentAudioBuffer = audioBuffer;
       currentWaveFormData = getWaveformData(audioBuffer, width / smoothing);
       svg
@@ -919,8 +920,11 @@ function processTrack(buffer) {
         .setAttribute("d", getSVGPath(currentWaveFormData, height, smoothing));
       source.buffer = audioBuffer;
       source.connect(audioContext.destination);
-    })
-    .catch(console.error);
+    },
+    e => {
+      reject(e);
+    }
+  );
 }
 
 function proccesBlob(blob) {
