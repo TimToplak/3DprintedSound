@@ -736,8 +736,18 @@ if (navigator.mediaDevices.getUserMedia) {
   var chunks = [];
 
   var onSuccess = function(stream) {
-    var mediaRecorder = new MediaRecorder(stream);
+    try {
+      var mediaRecorder = new MediaRecorder(stream);
+    } catch (err) {
+      console.log(err);
+      document.getElementById("errorNoMediaRecordSupport").innerText =
+        "Your browser does not support media recording, try updating your browser or use Google Chrome or Firefox";
+      record.disabled = true;
+      stop.disabled = true;
 
+      record.style.background = "gray";
+      stop.style.background = "gray";
+    }
     record.onclick = function() {
       mediaRecorder.start();
       console.log(mediaRecorder.state);
@@ -946,7 +956,7 @@ cutWindow.style.width = audioCuttingWindow.offsetWidth - 36 + "px";
 var cutWindowStartWidth = audioCuttingWindow.offsetWidth - 40;
 
 var SVG2DWaveform = document.getElementById("SVG2DWaveform");
-
+/*
 window.addEventListener("resize", function(event) {
   console.log(event);
   cutWindow.style.width =
@@ -959,7 +969,7 @@ window.addEventListener("resize", function(event) {
   rightAudioCutter.style.left = "";
 });
 
-/*
+
 //IN DEVELOPMENT
 //recalculate values of audio buffer 
 var cutAudioButton = document.getElementById("cutAudioButton");
