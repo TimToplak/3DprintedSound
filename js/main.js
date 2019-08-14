@@ -307,16 +307,155 @@ async function addFlat3DWaveFormBuffer(values, step, heightScale, offset) {
   return mesh;
 }
 
-function doCSG(a, b, op, mat) {
-  var bspA = CSG.fromMesh(a);
-  var bspB = CSG.fromMesh(b);
-  var bspC = bspA[op](bspB);
-  var result = CSG.toMesh(bspC, a.matrix);
-  result.material = mat;
-  result.castShadow = result.receiveShadow = true;
-  return result;
-}
+async function addSpectrogram3DWaveForm(values, step, heightScale, offset) {
+  var freqData = await getFrequencys(smoothing);
+  console.log(freqData);
+  var depth = 1;
 
+  var geometry = new THREE.BufferGeometry();
+
+  var positions = [];
+
+  positions.push(0, 0, 0);
+  positions.push(
+    0,
+    freqData[0][freqData[0].length - 1] * heightScale + offset,
+    depth * freqData[0].length - 1
+  );
+  positions.push(
+    0,
+    freqData[0][freqData[0].length - 1] * heightScale + offset,
+    0
+  );
+
+  positions.push(0, 0, 0);
+  positions.push(0, 0, depth * freqData[0].length - 1);
+  positions.push(
+    0,
+    freqData[0][freqData[0].length - 1] * heightScale + offset,
+    depth * freqData[0].length - 1
+  );
+
+  //
+  positions.push(freqData.length - 1 * step, 0, 0);
+  positions.push(
+    freqData.length - 1 * step,
+    freqData[0][freqData[0].length - 1] * heightScale + offset,
+    depth * freqData[0].length - 1
+  );
+  positions.push(
+    freqData.length - 1 * step,
+    freqData[0][freqData[0].length - 1] * heightScale + offset,
+    0
+  );
+
+  positions.push(freqData.length - 1 * step, 0, 0);
+  positions.push(freqData.length - 1 * step, 0, depth * freqData[0].length - 1);
+  positions.push(
+    freqData.length - 1 * step,
+    freqData[0][freqData[0].length - 1] * heightScale + offset,
+    depth * freqData[0].length - 1
+  );
+
+  for (var i = 0; i < freqData.length - 1; i++) {
+    //back
+    positions.push(i * step, 0, 0);
+    positions.push(i * step, freqData[i][0] * heightScale + offset, 0);
+    positions.push(
+      (i + 1) * step,
+      freqData[i + 1][0] * heightScale + offset,
+      0
+    );
+
+    positions.push(i * step, 0, 0);
+    positions.push(
+      (i + 1) * step,
+      freqData[i + 1][0] * heightScale + offset,
+      0
+    );
+    positions.push((i + 1) * step, 0, 0);
+
+    //front
+    positions.push(
+      (i + 1) * step,
+      freqData[i + 1][freqData[0].length - 1] * heightScale + offset,
+      depth * freqData[0].length - 1
+    );
+    positions.push(
+      i * step,
+      freqData[i][freqData[0].length - 1] * heightScale + offset,
+      depth * freqData[0].length - 1
+    );
+    positions.push(i * step, 0, depth * freqData[0].length - 1);
+
+    positions.push(
+      (i + 1) * step,
+      freqData[i + 1][freqData[0].length - 1] * heightScale + offset,
+      depth * freqData[0].length - 1
+    );
+    positions.push(i * step, 0, depth * freqData[0].length - 1);
+    positions.push((i + 1) * step, 0, depth * freqData[0].length - 1);
+
+    //bottom
+    positions.push(i * step, 0, depth * freqData[0].length - 1);
+    positions.push(i * step, 0, 0);
+    positions.push((i + 1) * step, 0, 0);
+
+    positions.push(i * step, 0, depth * freqData[0].length - 1);
+    positions.push((i + 1) * step, 0, 0);
+    positions.push((i + 1) * step, 0, depth * freqData[0].length - 1);
+
+    for (var j = 0; j < freqData[0].length - 1; j++) {
+      //top
+      positions.push(
+        (i + 1) * step,
+        freqData[i + 1][j] * heightScale + offset,
+        depth * j
+      );
+      positions.push(
+        i * step,
+        freqData[i][j] * heightScale + offset,
+        depth * j
+      );
+      positions.push(
+        i * step,
+        freqData[i][j + 1] * heightScale + offset,
+        depth * (j + 1)
+      );
+
+      positions.push(
+        (i + 1) * step,
+        freqData[i + 1][j + 1] * heightScale + offset,
+        depth * (j + 1)
+      );
+      positions.push(
+        i * step,
+        freqData[i][j + 1] * heightScale + offset,
+        depth * (j + 1)
+      );
+      positions.push(
+        (i + 1) * step,
+        freqData[i + 1][j] * heightScale + offset,
+        depth * j
+      );
+    }
+  }
+
+  // itemSize = 3 because there are 3 values (components) per vertex
+  geometry.addAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(positions, 3)
+  );
+
+  geometry.computeVertexNormals();
+
+  var geometry = new THREE.Geometry().fromBufferGeometry(geometry);
+  geometry.mergeVertices();
+  assignUVs(geometry);
+  var mesh = new THREE.Mesh(geometry, g_material);
+
+  return mesh;
+}
 function assignUVs(geometry) {
   geometry.faceVertexUvs[0] = [];
 
@@ -348,6 +487,7 @@ function animate() {
 animate();
 
 async function add3DWaveformFromData(values) {
+  //TODO: clean up parameter
   var step = Number(document.getElementById("step").value);
   var offset = Number(document.getElementById("offset").value);
   var heightScale = Number(document.getElementById("heightScale").value);
@@ -384,8 +524,15 @@ async function add3DWaveformFromData(values) {
       heightScale,
       offset
     );
-  } else {
+  } else if (waveFormType == "circle") {
     waveFormMesh = await addCircle3DWaveForm(values, step, heightScale, offset);
+  } else if (waveFormType == "freq") {
+    waveFormMesh = await addSpectrogram3DWaveForm(
+      values,
+      step,
+      heightScale,
+      offset
+    );
   }
 
   document.getElementById("loadingScreen").style.display = "block";
@@ -794,6 +941,13 @@ const RMS = values =>
 const avg = values =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
 const max = values => values.reduce((max, value) => Math.max(max, value), 0);
+const avg2D = a =>
+  a
+    .reduce((acc, cur) => {
+      cur.forEach((e, i) => (acc[i] = acc[i] ? acc[i] + e : e));
+      return acc;
+    }, [])
+    .map(e => e / a.length / 255);
 
 function getWaveformData(
   audioBuffer,
@@ -942,6 +1096,43 @@ function proccesBlob(blob) {
   reader.readAsArrayBuffer(blob);
   reader.onload = e => processTrack(e.target.result);
   attachToAudio(blob);
+}
+
+async function getFrequencys(smoothing) {
+  var dataWindow = Math.round(smoothing);
+  var offline = new OfflineAudioContext(2, currentAudioBuffer.length, 44100);
+  var bufferSource = offline.createBufferSource();
+  bufferSource.buffer = currentAudioBuffer;
+
+  var analyser = offline.createAnalyser();
+  analyser.fftSize = 128;
+  var scp = offline.createScriptProcessor(256, 0, 1);
+
+  bufferSource.connect(analyser);
+  scp.connect(offline.destination); // this is necessary for the script processor to start
+
+  var i = 0;
+  var buffer = [];
+  var allFreqData = [];
+  var freqData = new Uint8Array(analyser.frequencyBinCount);
+  scp.onaudioprocess = function() {
+    analyser.getByteFrequencyData(freqData);
+    i++;
+
+    buffer.push(Array.from(freqData));
+    if (buffer.length === dataWindow) {
+      allFreqData.push(avg2D(buffer));
+      buffer = [];
+    }
+  };
+
+  bufferSource.start(0);
+  return new Promise(function(resolve, reject) {
+    offline.oncomplete = function(e) {
+      resolve(allFreqData);
+    };
+    offline.startRendering();
+  });
 }
 
 //CUTTING AUDIO
@@ -1330,3 +1521,10 @@ trs.forEach(tr => {
     });
   }
 });
+
+freqFTTsizeRange = document.getElementById("freqFTTsizeRange");
+freqFTTsize = document.getElementById("freqFFTsize");
+//POW FFTSIZE
+function powFFTsize() {
+  freqFTTsize.value = Math.pow(2, +freqFTTsizeRange.value);
+}

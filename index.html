@@ -262,6 +262,7 @@
             <div id="tabstrip">
               <span value="flat"><b>Flat</b></span>
               <span value="circle"><b>Circular</b></span>
+              <span value="freq"><b>Spectrogram</b></span>
 
               <div>
                 <table>
@@ -308,6 +309,83 @@
                       </div>
                     </td>
                     <td><input id="segmets" type="number" value="15" /></td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <table>
+                  <tr>
+                    <td>
+                      Depth:
+                    </td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="0"
+                          max="5"
+                          value="1"
+                          step="0.1"
+                          class="slider"
+                        />
+                      </div>
+                    </td>
+                    <td><input id="freqDepth" type="number" value="1" /></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      FTT size:
+                    </td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                        id="freqFTTsizeRange"
+                         oninput="powFFTsize()"
+                          type="range"
+                          min="4"
+                          max="10"
+                          value="4"
+                          class="slider"
+                        />
+                      </div>
+                    </td>
+                    <td><input id="freqFFTsize" type="number" value="64" /></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Min decibels:
+                    </td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="-150"
+                          max="0"
+                          value="-100"
+                          step="0.1"
+                          class="slider"
+                        />
+                      </div>
+                    </td>
+                    <td><input id="freqMin" type="number" value="-100" /></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Max decibels:
+                    </td>
+                    <td>
+                      <div class="slidecontainer">
+                        <input
+                          type="range"
+                          min="-150"
+                          max="0"
+                          value="-30"
+                          step="0.1"
+                          class="slider"
+                        />
+                      </div>
+                    </td>
+                    <td><input id="freqMax" type="number" value="-30" /></td>
                   </tr>
                 </table>
               </div>

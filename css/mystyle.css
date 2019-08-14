@@ -161,16 +161,9 @@ button {
 }
 
 .line {
-  border: 0;
-  height: 2px;
-  background-image: linear-gradient(
-    to right,
-    rgba(0, 0, 0, 0),
-    #cdd1c4 20% 80%,
-    rgba(0, 0, 0, 0)
-  );
-  width: 95%;
-  margin-left: 2.5%;
+  border-width: 2px;
+  border-color: #cdd1c4;
+  width: 100%;
 }
 
 .post-wrapper {
@@ -244,18 +237,22 @@ a:hover {
   float: left;
 
   border-top: 1.5px solid #cdd1c4;
+  border-right: 1.5px solid #cdd1c4;
+  border-left: 1.5px solid #cdd1c4;
   min-width: 3em;
   overflow: hidden;
   padding: 0.625em;
   white-space: nowrap;
   text-align: center;
-  width: 50%;
+  width: 33.33333%;
   margin-top: 10px;
 }
 
 .activeTab {
   background-color: #30323d;
   color: #cdd1c4;
+  border-right: 0;
+  border-left: 0;
 }
 
 .inactiveTab {
@@ -263,15 +260,6 @@ a:hover {
   border-bottom: 1.5px solid #cdd1c4;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   color: black;
-}
-
-.inactiveTab:first-child {
-  border-right: 1.5px solid #cdd1c4;
-  border-bottom-right-radius: 4px;
-}
-.inactiveTab:nth-child(2) {
-  border-left: 1.5px solid #cdd1c4;
-  border-bottom-left-radius: 4px;
 }
 
 .inactiveTab:hover {
