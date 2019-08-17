@@ -334,7 +334,7 @@
                   </tr>
                   <tr>
                     <td>
-                      FTT size:
+                      FFT size:
                     </td>
                     <td>
                       <div class="slidecontainer">
@@ -342,14 +342,14 @@
                         id="freqFTTsizeRange"
                          oninput="powFFTsize()"
                           type="range"
-                          min="4"
-                          max="10"
-                          value="4"
-                          class="slider"
+                          min="5"
+                          max="15"
+                          value="7"
+                          class="slider skip"
                         />
                       </div>
                     </td>
-                    <td><input id="freqFFTsize" type="number" value="64" /></td>
+                    <td><input id="freqFFTsize" type="number" value="128" disabled/></td>
                   </tr>
                   <tr>
                     <td>
@@ -379,13 +379,13 @@
                           type="range"
                           min="-150"
                           max="0"
-                          value="-30"
+                          value="0"
                           step="0.1"
                           class="slider"
                         />
                       </div>
                     </td>
-                    <td><input id="freqMax" type="number" value="-30" /></td>
+                    <td><input id="freqMax" type="number" value="0" /></td>
                   </tr>
                 </table>
               </div>

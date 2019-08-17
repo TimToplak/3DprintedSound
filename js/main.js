@@ -307,55 +307,65 @@ async function addFlat3DWaveFormBuffer(values, step, heightScale, offset) {
   return mesh;
 }
 
-async function addSpectrogram3DWaveForm(values, step, heightScale, offset) {
-  var freqData = await getFrequencys(smoothing);
-  console.log(freqData);
-  var depth = 1;
+async function addSpectrogram3DWaveForm(step, heightScale, offset) {
+  var minDec = Number(document.getElementById("freqMin").value);
+  var maxDec = Number(document.getElementById("freqMax").value);
+  var fftSize = Number(document.getElementById("freqFFTsize").value);
 
+  var tempFreqData = await getFrequencys(
+    10 * smoothing,
+    fftSize,
+    minDec,
+    maxDec
+  );
+
+  var freqData = tempFreqData.slice(
+    tempFreqData.length * normalizedLeftCutterPosition,
+    tempFreqData.length * normalizedRightCutterPosition
+  );
+  var depth = Number(document.getElementById("freqDepth").value);
   var geometry = new THREE.BufferGeometry();
 
   var positions = [];
 
-  positions.push(0, 0, 0);
-  positions.push(
-    0,
-    freqData[0][freqData[0].length - 1] * heightScale + offset,
-    depth * freqData[0].length - 1
-  );
-  positions.push(
-    0,
-    freqData[0][freqData[0].length - 1] * heightScale + offset,
-    0
-  );
+  for (var i = 0; i < freqData[0].length - 1; i++) {
+    positions.push(0, 0, depth * i);
+    positions.push(0, freqData[0][i] * heightScale + offset, depth * i);
+    positions.push(
+      0,
+      freqData[0][i + 1] * heightScale + offset,
+      depth * (i + 1)
+    );
 
-  positions.push(0, 0, 0);
-  positions.push(0, 0, depth * freqData[0].length - 1);
-  positions.push(
-    0,
-    freqData[0][freqData[0].length - 1] * heightScale + offset,
-    depth * freqData[0].length - 1
-  );
+    positions.push(0, 0, depth * i);
+    positions.push(
+      0,
+      freqData[0][i + 1] * heightScale + offset,
+      depth * (i + 1)
+    );
+    positions.push(0, 0, depth * (i + 1));
 
-  //
-  positions.push(freqData.length - 1 * step, 0, 0);
-  positions.push(
-    freqData.length - 1 * step,
-    freqData[0][freqData[0].length - 1] * heightScale + offset,
-    depth * freqData[0].length - 1
-  );
-  positions.push(
-    freqData.length - 1 * step,
-    freqData[0][freqData[0].length - 1] * heightScale + offset,
-    0
-  );
+    //
+    positions.push(freqData.length - 1 * step, 0, depth * i);
+    positions.push(
+      freqData.length - 1 * step,
+      freqData[freqData.length - 1][i + 1] * heightScale + offset,
+      depth * (i + 1)
+    );
+    positions.push(
+      freqData.length - 1 * step,
+      freqData[freqData.length - 1][i] * heightScale + offset,
+      depth * i
+    );
 
-  positions.push(freqData.length - 1 * step, 0, 0);
-  positions.push(freqData.length - 1 * step, 0, depth * freqData[0].length - 1);
-  positions.push(
-    freqData.length - 1 * step,
-    freqData[0][freqData[0].length - 1] * heightScale + offset,
-    depth * freqData[0].length - 1
-  );
+    positions.push(freqData.length - 1 * step, 0, depth * i);
+    positions.push(freqData.length - 1 * step, 0, depth * (i + 1));
+    positions.push(
+      freqData.length - 1 * step,
+      freqData[freqData.length - 1][i + 1] * heightScale + offset,
+      depth * (i + 1)
+    );
+  }
 
   for (var i = 0; i < freqData.length - 1; i++) {
     //back
@@ -374,6 +384,15 @@ async function addSpectrogram3DWaveForm(values, step, heightScale, offset) {
       0
     );
     positions.push((i + 1) * step, 0, 0);
+
+    //bottom
+    positions.push(i * step, 0, depth * freqData[0].length - 1);
+    positions.push(i * step, 0, 0);
+    positions.push((i + 1) * step, 0, 0);
+
+    positions.push(i * step, 0, depth * freqData[0].length - 1);
+    positions.push((i + 1) * step, 0, 0);
+    positions.push((i + 1) * step, 0, depth * freqData[0].length - 1);
 
     //front
     positions.push(
@@ -396,27 +415,19 @@ async function addSpectrogram3DWaveForm(values, step, heightScale, offset) {
     positions.push(i * step, 0, depth * freqData[0].length - 1);
     positions.push((i + 1) * step, 0, depth * freqData[0].length - 1);
 
-    //bottom
-    positions.push(i * step, 0, depth * freqData[0].length - 1);
-    positions.push(i * step, 0, 0);
-    positions.push((i + 1) * step, 0, 0);
-
-    positions.push(i * step, 0, depth * freqData[0].length - 1);
-    positions.push((i + 1) * step, 0, 0);
-    positions.push((i + 1) * step, 0, depth * freqData[0].length - 1);
-
     for (var j = 0; j < freqData[0].length - 1; j++) {
       //top
-      positions.push(
-        (i + 1) * step,
-        freqData[i + 1][j] * heightScale + offset,
-        depth * j
-      );
       positions.push(
         i * step,
         freqData[i][j] * heightScale + offset,
         depth * j
       );
+      positions.push(
+        (i + 1) * step,
+        freqData[i + 1][j] * heightScale + offset,
+        depth * j
+      );
+
       positions.push(
         i * step,
         freqData[i][j + 1] * heightScale + offset,
@@ -527,12 +538,7 @@ async function add3DWaveformFromData(values) {
   } else if (waveFormType == "circle") {
     waveFormMesh = await addCircle3DWaveForm(values, step, heightScale, offset);
   } else if (waveFormType == "freq") {
-    waveFormMesh = await addSpectrogram3DWaveForm(
-      values,
-      step,
-      heightScale,
-      offset
-    );
+    waveFormMesh = await addSpectrogram3DWaveForm(step, heightScale, offset);
   }
 
   document.getElementById("loadingScreen").style.display = "block";
@@ -1098,14 +1104,16 @@ function proccesBlob(blob) {
   attachToAudio(blob);
 }
 
-async function getFrequencys(smoothing) {
+async function getFrequencys(smoothing, fttSize, minDec, maxDec) {
   var dataWindow = Math.round(smoothing);
   var offline = new OfflineAudioContext(2, currentAudioBuffer.length, 44100);
   var bufferSource = offline.createBufferSource();
   bufferSource.buffer = currentAudioBuffer;
 
   var analyser = offline.createAnalyser();
-  analyser.fftSize = 128;
+  analyser.fftSize = fttSize;
+  analyser.minDecibels = minDec;
+  analyser.maxDecibels = maxDec;
   var scp = offline.createScriptProcessor(256, 0, 1);
 
   bufferSource.connect(analyser);
@@ -1513,7 +1521,7 @@ function AudioBufferSlice(buffer, begin, end, callback) {
 //RANGE SLIDER
 var trs = document.querySelectorAll("table tr");
 trs.forEach(tr => {
-  var inputRange = tr.querySelector("input[type='range']");
+  var inputRange = tr.querySelector("input[type='range']:not(.skip)");
   var inputNumber = tr.querySelector("input[type='number']");
   if (inputNumber && inputRange) {
     inputRange.addEventListener("input", function() {
