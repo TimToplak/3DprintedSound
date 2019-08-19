@@ -346,22 +346,22 @@ async function addSpectrogram3DWaveForm(step, heightScale, offset) {
     positions.push(0, 0, depth * (i + 1));
 
     //
-    positions.push(freqData.length - 1 * step, 0, depth * i);
+    positions.push((freqData.length - 1) * step, 0, depth * i);
     positions.push(
-      freqData.length - 1 * step,
+      (freqData.length - 1) * step,
       freqData[freqData.length - 1][i + 1] * heightScale + offset,
       depth * (i + 1)
     );
     positions.push(
-      freqData.length - 1 * step,
+      (freqData.length - 1) * step,
       freqData[freqData.length - 1][i] * heightScale + offset,
       depth * i
     );
 
-    positions.push(freqData.length - 1 * step, 0, depth * i);
-    positions.push(freqData.length - 1 * step, 0, depth * (i + 1));
+    positions.push((freqData.length - 1) * step, 0, depth * i);
+    positions.push((freqData.length - 1) * step, 0, depth * (i + 1));
     positions.push(
-      freqData.length - 1 * step,
+      (freqData.length - 1) * step,
       freqData[freqData.length - 1][i + 1] * heightScale + offset,
       depth * (i + 1)
     );
@@ -395,24 +395,24 @@ async function addSpectrogram3DWaveForm(step, heightScale, offset) {
     positions.push(i * step, 0, depth * freqData[0].length - 1);
 
     //front
-    positions.push(i * step, 0, depth * freqData[0].length - 1);
+    positions.push(i * step, 0, depth * (freqData[0].length - 1));
     positions.push(
       i * step,
       freqData[i][freqData[0].length - 1] * heightScale + offset,
-      depth * freqData[0].length - 1
+      depth * (freqData[0].length - 1)
     );
     positions.push(
       (i + 1) * step,
       freqData[i + 1][freqData[0].length - 1] * heightScale + offset,
-      depth * freqData[0].length - 1
+      depth * (freqData[0].length - 1)
     );
 
-    positions.push((i + 1) * step, 0, depth * freqData[0].length - 1);
-    positions.push(i * step, 0, depth * freqData[0].length - 1);
+    positions.push((i + 1) * step, 0, depth * (freqData[0].length - 1));
+    positions.push(i * step, 0, depth * (freqData[0].length - 1));
     positions.push(
       (i + 1) * step,
       freqData[i + 1][freqData[0].length - 1] * heightScale + offset,
-      depth * freqData[0].length - 1
+      depth * (freqData[0].length - 1)
     );
 
     for (var j = 0; j < freqData[0].length - 1; j++) {
