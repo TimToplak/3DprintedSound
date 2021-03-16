@@ -2,7 +2,7 @@ body {
   background-color: #4d5061;
   /*background-image: url("../assets/whitenoise-1920x1080_small.png"); */
   font-size: 0.85em !important;
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   color: white;
 }
 #leftAudioCutter {
@@ -290,7 +290,7 @@ a:hover {
   margin: 5px;
 }
 
-input[type="number"] {
+input[type='number'] {
   width: 60px;
   color: white;
   background: transparent;
@@ -300,13 +300,13 @@ input[type="number"] {
   text-align: center;
 }
 
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input[type="text"] {
+input[type='text'] {
   width: 50%;
   color: white;
   background: transparent;
@@ -315,7 +315,7 @@ input[type="text"] {
   border-bottom: 2px solid #fab801;
 }
 
-input [type="file"] {
+input [type='file'] {
   color: white;
   background: #30323d;
   border: 1px solid #30323d;
@@ -346,7 +346,7 @@ input [type="file"] {
   text-align: center;
 }
 
-input[type="file"] {
+input[type='file'] {
   display: none;
 }
 .custom-file-upload {
